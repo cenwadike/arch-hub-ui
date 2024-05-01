@@ -1,10 +1,47 @@
-import Head from 'next/head'
-import Image from 'next/image'
 import { Inter } from '@next/font/google'
-import styles from '@/styles/Home.module.css'
 import Link from 'next/link'
+import { SigningArchwayClient } from '@archwayhq/arch3.js';
+import ChainInfo from 'constantine.config';
+
+// import {connectKeplrWallet} from "../lib/connect"
 
 const inter = Inter({ subsets: ['latin'] })
+let accounts, CosmWasmClient, queryHandler;
+
+async function handleConnectWallet() {
+  // event.preventDefault();
+  if (window['keplr']) {
+    if (window.keplr['experimentalSuggestChain']) {
+        // await window.keplr.experimentalSuggestChain();
+        await window.keplr.enable(ChainInfo.chainId);
+        window.keplr.defaultOptions = {
+        sign: {
+            preferNoSetFee: true,
+        }   
+        }
+        const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
+        CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
+        // This async waits for the user to authorize your dapp
+        // it returns their account address only after permissions
+        // to read that address are granted
+        accounts = await offlineSigner.getAccounts();
+        // A less verbose reference to handle our queries
+        queryHandler = CosmWasmClient.queryContractSmart;
+        console.log('Wallet connected', {
+        offlineSigner: offlineSigner,
+        CosmWasmClient: CosmWasmClient,
+        accounts: accounts,
+        chain: ChainInfo,
+        queryHandler: queryHandler,
+        });
+    } else {
+        console.warn('Error accessing experimental features, please update Keplr');
+    }
+} else {
+    console.warn('Error accessing Keplr, please install Keplr');
+}
+}
+
 
 export default function Home() {
   return (
@@ -16,6 +53,7 @@ export default function Home() {
         <div className="p-2 rounded-2xl bg-cover bg-orange-600 text-white hover:text-gray-200 hover:bg-orange-700 hover:p-3 font-mono font-semibold text-lg">
           <Link 
             href="/navigation"
+            onClick={handleConnectWallet}
           >
             connect wallet
           </Link>
