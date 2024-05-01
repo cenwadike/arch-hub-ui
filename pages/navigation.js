@@ -1,7 +1,4 @@
-import Head from 'next/head'
-import Image from 'next/image'
 import { Inter } from '@next/font/google'
-import styles from '@/styles/Home.module.css'
 import Link from 'next/link'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -14,17 +11,17 @@ export default function Home() {
             Arch-Hub          
         </p>
         <div className="p-2 rounded-2xl bg-cover bg-orange-600 text-white hover:text-gray-200 hover:bg-orange-700 hover:p-3 font-mono font-semibold text-lg">
-          <Link 
+          <a 
             href="/navigation"
           >
             connect wallet
-          </Link>
+          </a>
         </div>
       </div>
 
       <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-orange-200 after:via-orange-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-orange-700 before:dark:opacity-10 after:dark:from-orange-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
         <p className="text-4xl font-semibold text-orange-600">
-          Decentralized Village for Boundless Innovation!
+          Decentralized Hub for Boundless Innovation!
         </p>
       </div>
 
