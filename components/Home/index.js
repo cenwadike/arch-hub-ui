@@ -18,7 +18,6 @@ export default function HomePage() {
 				const CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
 				const accounts = await offlineSigner.getAccounts();	// user accounts
 				const queryHandler = CosmWasmClient.queryContractSmart;	// A less verbose reference to handle our queries		
-				
 
 				console.log('Wallet connected', {
 					offlineSigner: offlineSigner,
@@ -30,6 +29,7 @@ export default function HomePage() {
 
 			} else {
 				console.warn('Error accessing experimental features, please update Keplr');
+
 			}
 		} else {
 			console.warn('Error accessing Keplr, please install Keplr');
@@ -53,7 +53,7 @@ export default function HomePage() {
 
       <div className="mb-32 flex justify-center text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left text-white animate-bounce">
         <Link
-          href="/navigation"
+          href="/profile"
 		  onClick={handleConnectWallet}
           className="group px-5 py-3 bg-orange-600 rounded-2xl text-white"
         >
