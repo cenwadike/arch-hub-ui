@@ -1,6 +1,9 @@
 import Link from "next/link";
-import { SigningArchwayClient } from '@archwayhq/arch3.js';
+import { SigningArchwayClient, ArchwayClient } from '@archwayhq/arch3.js';
 import ChainInfo from 'constantine.config';
+import CONTRACT_TESTNET_ADDRESS from "@/constants";
+
+let accounts, CosmWasmClient, queryHandler;
 
 export default function HomePage() {
 
@@ -15,10 +18,10 @@ export default function HomePage() {
 				}
 
 				const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
-				const CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
-				const accounts = await offlineSigner.getAccounts();	// user accounts
-				const queryHandler = CosmWasmClient.queryContractSmart;	// A less verbose reference to handle our queries		
-
+				CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
+				accounts = await offlineSigner.getAccounts();	// user accounts
+				queryHandler = CosmWasmClient.queryContractSmart;	// A less verbose reference to handle our queries	
+				
 				console.log('Wallet connected', {
 					offlineSigner: offlineSigner,
 					CosmWasmClient: CosmWasmClient,
@@ -26,6 +29,39 @@ export default function HomePage() {
 					chain: ChainInfo,
 					queryHandler: queryHandler,
 				});
+
+				// create profile txn
+				const ContractAddress = CONTRACT_TESTNET_ADDRESS;
+
+				let cost = '1000000000000000000'
+				let funds = [{
+					denom: 'aconst',
+					amount: cost,
+				}]
+
+				const msg = {
+					create_profile: {
+						name: "kombi",
+						hour_rate: "1000",
+						cost: cost
+					}
+				}
+
+				let tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, msg, 'auto', "Registering domain",
+				funds);
+				console.log("Update Availability", tx);
+
+				// query profile
+				const client = await ArchwayClient.connect('https://rpc.constantine.archway.io');
+				const entrypoint = {
+					profile: {
+						id:  "kombi.arch"
+					},
+				};
+			
+				let queryResult = await client.queryContractSmart(ContractAddress, entrypoint);
+				console.log('Profile Query', queryResult);
+				
 
 			} else {
 				console.warn('Error accessing experimental features, please update Keplr');

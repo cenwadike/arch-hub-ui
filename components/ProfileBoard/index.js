@@ -1,4 +1,22 @@
+import { useEffect } from "react";
+
 export default function ProfileBaord() {
+  // useEffect(() => {
+  //   const getProfile = async () => {
+  //     const ContractAddress = CONTRACT_TESTNET_ADDRESS;
+  //     // Query arguments
+  //     const entrypoint = {
+  //       profile: {
+  //           id:  "waledayofiv.arch"
+  //       },
+  //     };
+  
+  //     // Do query type 'smart'
+  //     let queryResult = await queryHandler.query(ContractAddress, entrypoint);
+  //     console.log('GetCount Query', queryResult);
+  //   };
+  // }, [])
+
     return (
         <>
           <div>
