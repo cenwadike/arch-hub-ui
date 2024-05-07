@@ -1,28 +1,164 @@
-import { useEffect } from "react";
+import Link from "next/link";
+import { SigningArchwayClient, ArchwayClient } from '@archwayhq/arch3.js';
+import ChainInfo from 'constantine.config';
+import {CONTRACT_TESTNET_ADDRESS, INFURA_API_KEY, INFURA_API_SECRET, IPFS_ENDPOINT} from "@/constants";
+import { create } from "ipfs-http-client";
+import { useEffect, useState } from "react";
 
 export default function ProfileBaord() {
-  // useEffect(() => {
-  //   const getProfile = async () => {
-  //     const ContractAddress = CONTRACT_TESTNET_ADDRESS;
-  //     // Query arguments
-  //     const entrypoint = {
-  //       profile: {
-  //           id:  "waledayofiv.arch"
-  //       },
-  //     };
+  let accounts, CosmWasmClient, queryHandler;
+  const [domainName, setDomainName] = useState();
+  const [availability, setAvailabilty] = useState();
+  const [hourRate, setHourRate] = useState();
+  const [ipfsHash, setIpfsHash] = useState()
+
+  // get profile
+  useEffect(() => {
+    async function getProfile() {
+      if (window['keplr']) {
+        if (window.keplr['experimentalSuggestChain']) {
+          await window.keplr.enable(ChainInfo.chainId);
+          window.keplr.defaultOptions = {
+            sign: {
+              preferNoSetFee: true,    
+            }   
+          }
   
-  //     // Do query type 'smart'
-  //     let queryResult = await queryHandler.query(ContractAddress, entrypoint);
-  //     console.log('GetCount Query', queryResult);
-  //   };
-  // }, [])
+          const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
+          CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
+          accounts = await offlineSigner.getAccounts();	// user accounts
+          queryHandler = CosmWasmClient.queryContractSmart;	// A less verbose reference to handle our queries	
+          
+          console.log('Wallet connected', {
+            offlineSigner: offlineSigner,
+            CosmWasmClient: CosmWasmClient,
+            accounts: accounts,
+            chain: ChainInfo,
+            queryHandler: queryHandler,
+          });
+          const ContractAddress = CONTRACT_TESTNET_ADDRESS;
+          const client = await ArchwayClient.connect(ChainInfo.rpc);
+          const address = accounts[0].address;
+          const entrypoint = {
+            profile: {
+              id:  address
+            },
+          };
+        
+          let {arch_id, available, hour_rate } = await client.queryContractSmart(ContractAddress, entrypoint);
+          setDomainName(arch_id);
+          setAvailabilty(available);
+          setHourRate(hour_rate);
+          
+
+          // get metadata from IPFS
+          let res = await client.queryContractSmart(ContractAddress, entrypoint);
+          let ipfsHash = res.meta_data.description;
+          setIpfsHash(ipfsHash);
+          console.log("Profile", ipfsHash);
+
+          const AuthHeader = 'Basic ' + Buffer.from(INFURA_API_KEY + ":" + INFURA_API_SECRET).toString('base64');
+
+          const ipfsClient = await create({
+            host: 'ipfs.infura.io',
+            port: 5001,
+            protocol: 'https',
+            headers: {
+              'Authorization': AuthHeader
+            }
+          });
+
+          const offChainMetadata = ipfsClient.cat(ipfsHash);
+          console.log("Offchain metadata: ",offChainMetadata );          
+        } else {
+          console.warn('Error accessing experimental features, please update Keplr');
+  
+        }
+      } else {
+        console.warn('Error accessing Keplr, please install Keplr');
+      }
+    }
+    getProfile();
+  }, [])
+
+  // create profile
+ const createProfile = async() => {
+  if (window['keplr']) {
+    if (window.keplr['experimentalSuggestChain']) {
+      await window.keplr.enable(ChainInfo.chainId);
+      window.keplr.defaultOptions = {
+        sign: {
+          preferNoSetFee: true,    
+        }   
+      }
+
+      const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
+      CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
+      accounts = await offlineSigner.getAccounts();	// user accounts
+      queryHandler = CosmWasmClient.queryContractSmart;	// A less verbose reference to handle our queries	
+      
+      console.log('Wallet connected', {
+        offlineSigner: offlineSigner,
+        CosmWasmClient: CosmWasmClient,
+        accounts: accounts,
+        chain: ChainInfo,
+        queryHandler: queryHandler,
+      });
+
+      // create profile txn
+      const ContractAddress = CONTRACT_TESTNET_ADDRESS;
+      let cost = '1000000000000000000'
+      let funds = [{
+        denom: 'aconst',
+        amount: cost,
+      }]
+
+      const create_profile_entry_point = {
+        create_profile: {
+          name: "komba",
+          hour_rate: "10",
+          cost: cost
+        }
+      }
+      let create_profile_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, create_profile_entry_point, 'auto', "Registering domain",
+      funds);
+      console.log("Create Profile with txn hash", create_profile_tx);
+    } else {
+      console.warn('Error accessing experimental features, please update Keplr');
+
+    }
+  } else {
+    console.warn('Error accessing Keplr, please install Keplr');
+  }
+ }
+
+
+  // TODO: create profile: pop modal to accept profile contents
+  
 
     return (
         <>
-          <div>
-            <div className="flex flex-row justify-end items-center md:pr-28 mt-10 pr-6">
-                <p className="bg-orange-600 rounded-xl text-white p-2"> domain_name</p>
-            </div>
+          <div className="md:w-12/12">
+            {
+              domainName ? 
+              <>
+                <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
+                    <p className="bg-orange-600 rounded-md text-white p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear">{domainName}</p>
+                </div>
+              </>
+            
+            :
+
+              <>
+                <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
+                    <p className="bg-orange-600 rounded-md text-white p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
+                    onClick={createProfile}>
+                      {"create profile"}
+                      </p>
+                </div>
+              </>
+            }
+              
 
             <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-24'>
               <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
@@ -61,7 +197,7 @@ export default function ProfileBaord() {
                       <hr className=' border border-gray-200 h-6 mx-2 md:mx-4'></hr>
                       <p className='text-gray-900 text-base mb-2'>Contract</p>
                       <hr className=' border border-gray-200 h-6 mx-2 md:mx-4'></hr>
-                      <p className='text-gray-900 text-base mb-2'>$30/hr</p>
+                      <p className='text-gray-900 text-base mb-2'>${hourRate ? hourRate : "_"}/hr</p>
                     </div>
                   </div>
                 </div>
@@ -79,7 +215,7 @@ export default function ProfileBaord() {
                       </h>
                     </div>
                     <div className='inline-flex flex-row'>
-                      <p className='text-gray-900 text-base mb-2'>Open to work</p>
+                      <p className='text-gray-900 text-base mb-2'>{availability ? "Open to work" : "Not open to work"}</p>
                     </div>
                   </div>
                 </div>

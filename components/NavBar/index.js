@@ -9,7 +9,7 @@ import Link from "next/link";
 export default function NavBar() {
     return (
         <>
-            <div className='fixed top-0 left-0 h-screen w-24 m-0 flex flex-col bg-gray-900 text-secondary shadow'>
+            <div className='fixed top-0 left-0 h-full w-2/12 m-0 flex flex-col bg-gray-900 text-secondary'>
                 <Link href={"/profile"}>
                     <SidebarIcon icon={<MdHomeFilled size='28' />} text={"profile"} />
                 </Link>

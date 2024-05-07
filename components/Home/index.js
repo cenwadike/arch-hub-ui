@@ -67,11 +67,15 @@ export default function HomePage() {
 
 				const profileMetadata = {
 					"address": accounts[0].address,
-					"portfolio": "",
+					"portfolio": "github.com/cenwadike",
+					"skills": "{}",
 					"availability": true,
-					"hourly_rate": "$10/hr",
+					"hourly_rate": "$35/hr",
+					"preferences": "",
 					"reviews_given": [{
-						"reciver_address": ""
+						"reciver_address": "",
+						"text": "",
+						"created_at": ""
 					}],
 				}
 
