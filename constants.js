@@ -1,6 +1,5 @@
-const CW721_ADDRESS  =  "archway146htsfvftmq8fl26977w9xgdwmsptr2quuf7yyra4j0gttx32z3secq008";
-const ARCH_REGISTRY_ADDRESS =  "archway1lr8rstt40s697hqpedv2nvt27f4cuccqwvly9gnvuszxmcevrlns60xw4r";
-const DENOM  =  "aconst";
-const CONTRACT_TESTNET_ADDRESS = "archway1yd3xfkyktp7sty3806cdugnfpyykfj7mkly3wt7ux7m6x7v7r6fsrr4lwr";
+export const CONTRACT_TESTNET_ADDRESS = "archway1q8dejsph4yupcx3vd6gnfgr2zh35uj5ceqcdufnwcfp4nyk8f2yqayxrax";
+export const IPFS_ENDPOINT = "https://ipfs.infura.io:5001"
+export const INFURA_API_KEY = "25YgFjDoa4wN50egzBDz5E9m9v9"
+export const INFURA_API_SECRET = "c3b4650e90e9326e80e2918fd3dc6d35"
 
-export default CONTRACT_TESTNET_ADDRESS;
