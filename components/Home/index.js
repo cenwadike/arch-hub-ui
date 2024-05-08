@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SigningArchwayClient, ArchwayClient } from '@archwayhq/arch3.js';
 import ChainInfo from 'constantine.config';
-import {CONTRACT_TESTNET_ADDRESS, INFURA_API_KEY, INFURA_API_SECRET, IPFS_ENDPOINT} from "@/constants";
+import {CONTRACT_TESTNET_ADDRESS, INFURA_API_KEY, INFURA_API_SECRET} from "@/constants";
 import { create } from "ipfs-http-client";
 
 let accounts, CosmWasmClient, queryHandler;

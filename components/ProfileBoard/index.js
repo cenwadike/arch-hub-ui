@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { SigningArchwayClient, ArchwayClient } from '@archwayhq/arch3.js';
 import ChainInfo from 'constantine.config';
-import {CONTRACT_TESTNET_ADDRESS, INFURA_API_KEY, INFURA_API_SECRET, IPFS_ENDPOINT} from "@/constants";
+import {CONTRACT_TESTNET_ADDRESS, INFURA_API_KEY, INFURA_API_SECRET} from "@/constants";
 import { create } from "ipfs-http-client";
 import { useEffect, useState } from "react";
+import Modal from 'react-modal';
+import CreateProfileModal from "../CreateProfileModal";
 
 export default function ProfileBaord() {
   let accounts, CosmWasmClient, queryHandler;
@@ -11,6 +13,9 @@ export default function ProfileBaord() {
   const [availability, setAvailabilty] = useState();
   const [hourRate, setHourRate] = useState();
   const [ipfsHash, setIpfsHash] = useState()
+  const [createProfileModalIsOpen, setCreateProfileModalIsOpen] = useState(false);
+  const [createNewProfileName, setCreateNewProfileName] = useState();
+  const [createNewProfileRate, setCreateNewProfileRate] = useState();
 
   // get profile
   useEffect(() => {
@@ -115,14 +120,15 @@ export default function ProfileBaord() {
 
       const create_profile_entry_point = {
         create_profile: {
-          name: "komba",
-          hour_rate: "10",
+          name: createNewProfileName,
+          hour_rate: createNewProfileRate,
           cost: cost
         }
       }
-      let create_profile_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, create_profile_entry_point, 'auto', "Registering domain",
-      funds);
+      let create_profile_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, create_profile_entry_point, 'auto', "Registering domain", funds);
       console.log("Create Profile with txn hash", create_profile_tx);
+
+      setCreateProfileModalIsOpen(false)
     } else {
       console.warn('Error accessing experimental features, please update Keplr');
 
@@ -130,11 +136,7 @@ export default function ProfileBaord() {
   } else {
     console.warn('Error accessing Keplr, please install Keplr');
   }
- }
-
-
-  // TODO: create profile: pop modal to accept profile contents
-  
+ }  
 
     return (
         <>
@@ -152,11 +154,42 @@ export default function ProfileBaord() {
               <>
                 <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
                     <p className="bg-orange-600 rounded-md text-white p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
-                    onClick={createProfile}>
+                    onClick={e => setCreateProfileModalIsOpen(true)}>
                       {"create profile"}
                       </p>
                 </div>
               </>
+            }
+
+            {
+              createProfileModalIsOpen && 
+              <>
+                 <dialog
+                    className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
+                    <div className="bg-white m-auto py-6 px-16 flex justify-center items-center">
+                        <div className="flex flex-col items-center">
+                          <label className="text-orange-600 font-semibold">
+                            Name: {" "}
+                            <input 
+                              value={createNewProfileName}
+                              onChange={e => setCreateNewProfileName(e.currentTarget.value)}
+                              className="border border-md border-orange-600" type="text" name="name" 
+                            />
+                          </label> 
+                          <label className="text-orange-600 font-semibold pt-8">
+                            Rate: {" "}
+                            <input 
+                              value={createNewProfileRate}
+                              onChange={e => setCreateNewProfileRate(e.currentTarget.value)}
+                              className="border border-md border-orange-600" type="text" name="name" 
+                            />
+                          </label> 
+                          <br/>
+                          <button type="button" className="bg-orange-600 text-white p-2 rounded-md border-xl" onClick={createProfile}>Create Profile</button>
+                        </div>
+                    </div>
+                </dialog>
+              </> 
             }
               
 
