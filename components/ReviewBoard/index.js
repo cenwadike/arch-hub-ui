@@ -1,7 +1,7 @@
 export default function ReviewBoard() {
     return (
         <>
-          <div className="flex flex-row justify-end items-center md:pr-28 mt-10 pr-6">
+          <div className="flex flex-row justify-end items-center md:pr-28 mt-10 pr-6 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear">
                 <p className="bg-orange-600 rounded-xl text-white p-2"> domain_name</p>
           </div>
 

@@ -95,9 +95,25 @@ export default function StatusBoard() {
         <>
         <ToastContainer />
         <div className="md:w-12/12">
-          <div className="flex flex-row justify-end items-center md:pr-28 mt-10 pr-6">
-                <p className="bg-orange-600 rounded-xl text-white p-2">{domainName}</p>
-          </div>
+            {
+              domainName ? 
+              <>
+                <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
+                    <p className="bg-orange-600 rounded-md text-white font-bold p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear">{domainName}</p>
+                </div>
+              </>
+            
+            :
+
+              <>
+                <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
+                    <p className="bg-orange-600 rounded-md text-white font-semibold p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
+                    onClick={e => setCreateProfileModalIsOpen(true)}>
+                      {"create profile"}
+                      </p>
+                </div>
+              </>
+            }
 
           <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-24'>
               <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
