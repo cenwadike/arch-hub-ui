@@ -71,7 +71,13 @@ export default function HomePage() {
 					"skills": "{}",
 					"availability": true,
 					"hourly_rate": "$35/hr",
-					"preferences": "",
+					"preferences": {
+						"contract": true,
+						"fulltime": false,
+						"remote": true,
+						"enterprise": false,
+						"startup": true
+					},
 					"reviews_given": [{
 						"reciver_address": "",
 						"text": "",
@@ -85,7 +91,7 @@ export default function HomePage() {
 
 
 				const update_metadata_entry_point = {
-					update_metadata_two: {
+					update_metadata: {
 						name: "komba",
 						update: {
 							description: path,
