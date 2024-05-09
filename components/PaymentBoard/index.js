@@ -8,7 +8,10 @@ import 'react-toastify/dist/ReactToastify.css';
 let accounts, CosmWasmClient;
 export default function PaymentBoard() {
   const [domainName, setDomainName] = useState();
-  const [availability, setAvailabilty] = useState();
+  const [requestPaymentJobId, setRequestPaymentJobId] = useState();
+  const [approvePaymentJobId, setApprovePaymentJobId] = useState()
+  const [requestPaymentModalIsOpen, setRequestPaymentModalIsOpen] = useState(false);
+  const [approvePaymentModalIsOpen, setApprovePaymentModalIsOpen] = useState(false)
 
     // get profile
     useEffect(() => {
@@ -36,9 +39,8 @@ export default function PaymentBoard() {
             };
           
             try {
-              let {arch_id, available } = await client.queryContractSmart(ContractAddress, entrypoint);
+              let {arch_id } = await client.queryContractSmart(ContractAddress, entrypoint);
               setDomainName(arch_id);
-              setAvailabilty(available);
             } catch (error) {
               console.log(error)
             }
@@ -52,7 +54,7 @@ export default function PaymentBoard() {
       getProfile();
     }, [])
 
-    const handleChangeAvailability = async() => {
+    const handleRequestPayment = async() => {
       if (window['keplr']) {
         if (window.keplr['experimentalSuggestChain']) {
           await window.keplr.enable(ChainInfo.chainId);
@@ -65,22 +67,26 @@ export default function PaymentBoard() {
           const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
           CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
           accounts = await offlineSigner.getAccounts();	// user accounts
-          const ContractAddress = CONTRACT_TESTNET_ADDRESS;
-        
+          const ContractAddress = CONTRACT_TESTNET_ADDRESS;      
   
-          // set availability 
-          const set_availability_entry_point = {
-            set_availability: {
-              name: domainName,
-              available: !availability,  
+          // request payment 
+          const request_payment_entry_point = {
+            withdrawal_request: {
+                job_id: requestPaymentJobId,
             }
-          }
+        };
           try {
-            let set_availability_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, set_availability_entry_point, 'auto', "Updating Arch-Hub availability");
-            console.log("Update Profile availability with txn hash", set_availability_tx);
+            let request_payment_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, request_payment_entry_point, 'auto', "Requesting Arch-Hub Payment");
+            console.log("Payment requested with txn hash", request_payment_tx);
+            toast.success("Payment requested successfully!!", {
+                position: toast.TOP_LEFT,
+                autoClose: 6000, // Close the toast after 3 seconds
+              })
           } catch (error) {
             console.error(error)
           } 
+
+          setRequestPaymentModalIsOpen(false)
         } else {
           console.warn('Error accessing experimental features, please update Keplr');
   
@@ -89,49 +95,110 @@ export default function PaymentBoard() {
         console.warn('Error accessing Keplr, please install Keplr');
       }
     }
+
+    const handleApprovePayment = async() => {
+        if (window['keplr']) {
+          if (window.keplr['experimentalSuggestChain']) {
+            await window.keplr.enable(ChainInfo.chainId);
+            window.keplr.defaultOptions = {
+              sign: {
+                preferNoSetFee: true,    
+              }   
+            }
+    
+            const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
+            CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
+            accounts = await offlineSigner.getAccounts();	// user accounts
+            const ContractAddress = CONTRACT_TESTNET_ADDRESS;      
+    
+            // approve payment 
+            const approve_withdrawal_entry_point = {
+                approve_withdrawal: {
+                    job_id: approvePaymentJobId,
+                }
+            };
+            try {
+              let approve_withdrawal_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, approve_withdrawal_entry_point, 'auto', "Requesting Arch-Hub Payment");
+              console.log("Payment requested with txn hash", approve_withdrawal_tx);
+              toast.success("Payment requested successfully!!", {
+                position: toast.TOP_LEFT,
+                autoClose: 6000, // Close the toast after 3 seconds
+              })
+            } catch (error) {
+              console.error(error)
+            } 
+            setApprovePaymentModalIsOpen(false)
+          } else {
+            console.warn('Error accessing experimental features, please update Keplr');
+    
+          }
+        } else {
+          console.warn('Error accessing Keplr, please install Keplr');
+        }
+      }
   
 
     return (
         <>
         <ToastContainer />
         <div className="md:w-12/12">
-          <div className="flex flex-row justify-end items-center md:pr-28 mt-10 pr-6">
-                <p className="bg-orange-600 rounded-xl text-white p-2">{domainName}</p>
-          </div>
+            <div className="flex flex-row justify-end items-center md:pr-28 mt-10 pr-6">
+                    <p className="bg-orange-600 rounded-xl text-white p-2">{domainName}</p>
+            </div>
 
-          <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-24'>
-              <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
-                <div className='block pt-0 px-2 w-72 md:w-[36rem]'>
-                  <div className='inline-flex flex-col justify-start items-start'>
-                    <div className='flex justify-start'>
-                      <h className='text-orange-600 text-md font-semibold leading-tight mb-2 mr-24 md:mr-96'>
-                        {" "}
-                        Employment Status
-                      </h>
-                      {
-                        availability == false && 
-                        <label class="inline-flex items-center cursor-pointer">
-                          <input type="checkbox" value="" class="sr-only peer"
-                          onClick={handleChangeAvailability}/>
-                          <div class="relative w-11 h-6 bg-orange-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-600 dark:peer-focus:ring-orange-600 rounded-full peer dark:bg-orange-100 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-orange-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-orange-600 peer-checked:bg-orange-600"></div>
-                        </label>
-                      }
-                      {
-                        availability == true && 
-                        <label class="inline-flex items-center cursor-pointer">
-                          <input type="checkbox" value="" class="sr-only peer"
-                          onClick={handleChangeAvailability}/>
-                          <div class="relative w-11 h-6 bg-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-white dark:peer-focus:ring-white rounded-full peer dark:bg-orange-600 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-orange-600 after:border-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-white peer-checked:bg-white"></div>
-                        </label>
-                      }
-                    </div>
-                    <div className='inline-flex flex-row'>
-                      <p className='text-gray-900 text-base mb-2'>{availability ? "Open to work" : "Occupied"}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-24'>
+                <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 px-16 rounded-md border-xl hover:bg-white hover:text-orange-600 hover:border hover:border-orange-600 transition-all duration-300 ease-linear"
+                onClick={e => setRequestPaymentModalIsOpen(true)}>request payment</button>  
             </div>{" "}
+            {
+                requestPaymentModalIsOpen &&
+                <dialog
+                    className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
+                    <div className="bg-white m-auto py-6 px-16 flex justify-center items-center border rounded-lg">
+                        <div className="flex flex-col items-center">
+                          <label className="text-orange-600 font-semibold text-md">
+                            job id: {" "}
+                            <input 
+                              value={requestPaymentJobId}
+                              onChange={e => setRequestPaymentJobId(e.currentTarget.value)}
+                              placeholder="123"
+                              className="border border-md border-orange-600 ml-3 p-2 border rounded-md" type="text" name="name" 
+                            />
+                          </label> 
+                          
+                          <br/>
+                          <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl" onClick={handleRequestPayment}>request payment</button>
+                        </div>
+                    </div>
+                </dialog>
+            }
+
+            <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-24'>
+                <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 px-16 rounded-md border-xl hover:bg-white hover:text-orange-600 hover:border hover:border-orange-600 transition-all duration-300 ease-linear"
+                onClick={e => setApprovePaymentModalIsOpen(true)}>approve payment</button>  
+            </div>{" "}            
+            {
+                approvePaymentModalIsOpen &&
+                <dialog
+                    className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
+                    <div className="bg-white m-auto py-6 px-16 flex justify-center items-center border rounded-lg">
+                        <div className="flex flex-col items-center">
+                          <label className="text-orange-600 font-semibold text-md">
+                            job id: {" "}
+                            <input 
+                              value={approvePaymentJobId}
+                              onChange={e => setApprovePaymentJobId(e.currentTarget.value)}
+                              placeholder="123"
+                              className="border border-md border-orange-600 ml-3 p-2 border rounded-md" type="text" name="name" 
+                            />
+                          </label> 
+                          
+                          <br/>
+                          <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl" onClick={handleApprovePayment}>approve payment</button>
+                        </div>
+                    </div>
+                </dialog>
+            }
         </div>
         </>
     );
