@@ -1,11 +1,8 @@
-import Link from "next/link";
 import { SigningArchwayClient, ArchwayClient } from '@archwayhq/arch3.js';
 import ChainInfo from 'constantine.config';
 import {CONTRACT_TESTNET_ADDRESS, INFURA_API_KEY, INFURA_API_SECRET} from "@/constants";
 import { create } from "ipfs-http-client";
 import { useEffect, useState } from "react";
-import Modal from 'react-modal';
-import CreateProfileModal from "../CreateProfileModal";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -246,7 +243,7 @@ const handleUpdateProfile = async() => {
 
       const update_metadata_entry_point = {
         update_metadata: {
-          name: "kombeei",
+          name: domainName,
           update: {
             description: ipfsHash,
             image: "'_'",

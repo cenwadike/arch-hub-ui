@@ -14,7 +14,7 @@ export default function NavBar() {
                     <SidebarIcon icon={<MdHomeFilled size='28' />} text={"profile"} />
                 </Link>
                 <Link href={"/invoice"}>
-                    <SidebarIcon icon={<LiaMoneyCheckAltSolid size='28' />} text={"invoices"} />
+                    <SidebarIcon icon={<LiaMoneyCheckAltSolid size='28' />} text={"jobs"} />
                 </Link>
                 <Link href={"/status"}>
                     <SidebarIcon icon={<TbStatusChange size='28' />} text={"status"} />
