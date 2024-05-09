@@ -92,10 +92,6 @@ export default function ProfileBaord() {
           const offChainMetadata = ipfsClient.cat(ipfsHash);
           console.log("Offchain metadata: ",offChainMetadata ); 
           
-          toast.success("Welcome! Wallet connected successfully", {
-            position: toast.TOP_LEFT,
-            autoClose: 6000, // Close the toast after 3 seconds
-          })
         } else {
           console.warn('Error accessing experimental features, please update Keplr');
         }

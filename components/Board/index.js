@@ -1,4 +1,5 @@
 import JobBoard from "../JobBoard";
+import PaymentBoard from "../PaymentBoard";
 import ProfileBaord from "../ProfileBoard";
 import ReviewBoard from "../ReviewBoard";
 import StatusBoard from "../StatusBoard";
@@ -13,6 +14,10 @@ export default function Board({ page }) {
       
       case "jobs":
         return <JobBoard />;
+        break;
+
+      case "payments":
+        return <PaymentBoard />;
         break;
   
       case "status":

@@ -2,6 +2,7 @@ import { MdHomeFilled } from "react-icons/md";
 import { LiaMoneyCheckAltSolid } from "react-icons/lia";
 import { TbStatusChange } from "react-icons/tb";
 import { VscOpenPreview } from "react-icons/vsc";
+import { MdWorkHistory } from "react-icons/md";
 import SidebarIcon from '../SideBarIcon';
 import Link from "next/link";
 
@@ -13,8 +14,11 @@ export default function NavBar() {
                 <Link href={"/profile"}>
                     <SidebarIcon icon={<MdHomeFilled size='28' />} text={"profile"} />
                 </Link>
-                <Link href={"/invoice"}>
-                    <SidebarIcon icon={<LiaMoneyCheckAltSolid size='28' />} text={"jobs"} />
+                <Link href={"/jobs"}>
+                    <SidebarIcon icon={<MdWorkHistory size='28' />} text={"jobs"} />
+                </Link>
+                <Link href={"/payments"}>
+                    <SidebarIcon icon={<LiaMoneyCheckAltSolid size='28' />} text={"payment"} />
                 </Link>
                 <Link href={"/status"}>
                     <SidebarIcon icon={<TbStatusChange size='28' />} text={"status"} />
