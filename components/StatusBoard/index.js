@@ -10,10 +10,6 @@ export default function StatusBoard() {
   const [domainName, setDomainName] = useState();
   const [availability, setAvailabilty] = useState();
 
-  //TODO: get domain name on page load
-  
-  //TODO: set availability with toggle button
-
     // get profile
     useEffect(() => {
       async function getProfile() {

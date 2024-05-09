@@ -1,11 +1,8 @@
 import Link from "next/link";
-import { SigningArchwayClient, ArchwayClient } from '@archwayhq/arch3.js';
+import { SigningArchwayClient} from '@archwayhq/arch3.js';
 import ChainInfo from 'constantine.config';
-import {CONTRACT_TESTNET_ADDRESS, INFURA_API_KEY, INFURA_API_SECRET} from "@/constants";
-import { create } from "ipfs-http-client";
 
 let accounts, CosmWasmClient, queryHandler;
-
 
 export default function HomePage() {
 
@@ -32,113 +29,7 @@ export default function HomePage() {
 					queryHandler: queryHandler,
 				});
 
-				// create profile txn
-				const ContractAddress = CONTRACT_TESTNET_ADDRESS;
-				let cost = '1000000000000000000'
-				let funds = [{
-					denom: 'aconst',
-					amount: cost,
-				}]
-
-				const create_profile_entry_point = {
-					create_profile: {
-						name: "komba",
-						hour_rate: "10",
-						cost: cost
-					}
-				}
-				let create_profile_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, create_profile_entry_point, 'auto', "Registering domain",
-				funds);
-				console.log("Create Profile with txn hash", create_profile_tx);
-
-
-				// update metadata
-				const AuthHeader = 'Basic ' + Buffer.from(INFURA_API_KEY + ":" + INFURA_API_SECRET).toString('base64');
-
-				const ipfsClient = await create({
-					host: 'ipfs.infura.io',
-					port: 5001,
-					protocol: 'https',
-					headers: {
-					  'Authorization': AuthHeader
-					}
-				});
-				console.log("Created Ipfs client: ", ipfsClient);
-
-				const profileMetadata = {
-					"address": accounts[0].address,
-					"portfolio": "github.com/cenwadike",
-					"skills": "{}",
-					"availability": true,
-					"hourly_rate": "$35/hr",
-					"preferences": {
-						"contract": true,
-						"fulltime": false,
-						"remote": true,
-						"enterprise": false,
-						"startup": true
-					},
-					"reviews_given": [{
-						"reciver_address": "",
-						"text": "",
-						"created_at": ""
-					}],
-				}
-
-				const profileMetadataJson = JSON.stringify(profileMetadata);
-				let {cid, path} = await ipfsClient.add(profileMetadataJson);
-				console.log("Ipfs upload successful: ", cid, path);
-
-
-				const update_metadata_entry_point = {
-					update_metadata: {
-						name: "komba",
-						update: {
-							description: path,
-							image: "'_'",
-							accounts: [{username: "archid-protocol",profile: "https://github.com/archid-protocol",account_type: "github",verfication_hash: null}],
-							websites: [{url: "https://archid.app",domain: "dapp.archid.arch",verfication_hash: null}]
-						},  
-					}
-				}
-				let update_metadata_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, update_metadata_entry_point, 'auto', "Updating Arch-Hub profile metadata", funds);
-				console.log("Update Profile metadata with txn hash", update_metadata_tx);
-
-
-				// set availability 
-				const set_availability_entry_point = {
-					set_availability: {
-						name: "komba.arch",
-						available: true,  
-					}
-				}
-				let set_availability_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, set_availability_entry_point, 'auto', "Updating Arch-Hub availability", funds);
-				console.log("Update Profile availability with txn hash", set_availability_tx);
 				
-
-				// update hourly rate
-				const update_hourly_rate_entry_point = {
-					update_hourly_rate: {
-						name: "komba.arch",
-						hour_rate: "30",    
-					}
-				}
-				let update_hourly_rate_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, update_hourly_rate_entry_point, 'auto', "Updating Arch-Hub hourly rate");
-				console.log("Update hourly rate with txn hash", update_hourly_rate_tx);
-
-
-				// query profile
-				const client = await ArchwayClient.connect(ChainInfo.rpc);
-				const entrypoint = {
-					profile: {
-						id:  accounts[0].address
-					},
-				};
-			
-				let queryResult = await client.queryContractSmart(ContractAddress, entrypoint);
-				console.log('Profile Query', queryResult);
-				
-
 			} else {
 				console.warn('Error accessing experimental features, please update Keplr');
 
