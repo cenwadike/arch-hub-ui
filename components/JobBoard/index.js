@@ -1,56 +1,10 @@
 import { SigningArchwayClient, ArchwayClient } from '@archwayhq/arch3.js';
 import ChainInfo from 'constantine.config';
 import {CONTRACT_TESTNET_ADDRESS, INFURA_API_KEY, INFURA_API_SECRET} from "@/constants";
-import { create } from "ipfs-http-client";
-import { useEffect, useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import { useEffect} from "react";;
 
 let accounts, CosmWasmClient;
 export default function JobBoard() {
-  const [domainName, setDomainName] = useState();
-
-    // get profile
-    useEffect(() => {
-      async function getProfile() {
-        if (window['keplr']) {
-          if (window.keplr['experimentalSuggestChain']) {
-            await window.keplr.enable(ChainInfo.chainId);
-            window.keplr.defaultOptions = {
-              sign: {
-                preferNoSetFee: true,    
-              }   
-            }
-    
-            const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
-            CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
-            accounts = await offlineSigner.getAccounts();	// user accounts
-            
-            const ContractAddress = CONTRACT_TESTNET_ADDRESS;
-            const client = await ArchwayClient.connect(ChainInfo.rpc);
-            const address = accounts[0].address;
-            const entrypoint = {
-              profile: {
-                id:  address
-              },
-            };
-          
-            try {
-              let {arch_id, available } = await client.queryContractSmart(ContractAddress, entrypoint);
-              setDomainName(arch_id);
-            } catch (error) {
-              console.log(error)
-            }
-          } else {
-            console.warn('Error accessing experimental features, please update Keplr');
-          }
-        } else {
-          console.warn('Error accessing Keplr, please install Keplr');
-        }
-      }
-      getProfile();
-    }, [])
-
     useEffect( () => {
       async function handleCreatedJobs() {
         if (window['keplr']) {
@@ -147,26 +101,6 @@ export default function JobBoard() {
     return (
         <>
           <div className="md:w-12/12">
-            {
-              domainName ? 
-              <>
-                <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
-                    <p className="bg-orange-600 rounded-md text-white font-bold p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear">{domainName}</p>
-                </div>
-              </>
-            
-            :
-
-              <>
-                <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
-                    <p className="bg-orange-600 rounded-md text-white font-semibold p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
-                    onClick={e => setCreateProfileModalIsOpen(true)}>
-                      {"create profile"}
-                      </p>
-                </div>
-              </>
-            }
-
           <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-6'>
             <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
               <div className='block pt-0 px-2 w-72 md:w-[36rem]'>

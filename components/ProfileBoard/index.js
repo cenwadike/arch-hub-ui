@@ -9,7 +9,6 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function ProfileBaord() {
   let accounts, CosmWasmClient, queryHandler;
-  const [domainName, setDomainName] = useState();
   const [availability, setAvailabilty] = useState();
   const [hourRate, setHourRate] = useState();
   const [ipfsHash, setIpfsHash] = useState()
@@ -59,8 +58,7 @@ export default function ProfileBaord() {
           };
         
           try {
-            let {arch_id, available, hour_rate } = await client.queryContractSmart(ContractAddress, entrypoint);
-            setDomainName(arch_id);
+            let {available, hour_rate } = await client.queryContractSmart(ContractAddress, entrypoint);
             setAvailabilty(available);
             setHourRate(hour_rate);
           } catch (error) {
@@ -280,26 +278,6 @@ const handleUpdateProfile = async() => {
         <>
         <ToastContainer />
           <div className="md:w-12/12">
-            {
-              domainName ? 
-              <>
-                <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
-                    <p className="bg-orange-600 rounded-md text-white font-bold p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear">{domainName}</p>
-                </div>
-              </>
-            
-            :
-
-              <>
-                <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
-                    <p className="bg-orange-600 rounded-md text-white font-semibold p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
-                    onClick={e => setCreateProfileModalIsOpen(true)}>
-                      {"create profile"}
-                      </p>
-                </div>
-              </>
-            }
-
             {
               createProfileModalIsOpen && 
               <>

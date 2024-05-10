@@ -7,7 +7,6 @@ import 'react-toastify/dist/ReactToastify.css';
 
 let accounts, CosmWasmClient;
 export default function StatusBoard() {
-  const [domainName, setDomainName] = useState();
   const [availability, setAvailabilty] = useState();
 
     // get profile
@@ -37,7 +36,6 @@ export default function StatusBoard() {
           
             try {
               let {arch_id, available } = await client.queryContractSmart(ContractAddress, entrypoint);
-              setDomainName(arch_id);
               setAvailabilty(available);
             } catch (error) {
               console.log(error)
@@ -95,26 +93,6 @@ export default function StatusBoard() {
         <>
         <ToastContainer />
         <div className="md:w-12/12">
-            {
-              domainName ? 
-              <>
-                <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
-                    <p className="bg-orange-600 rounded-md text-white font-bold p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear">{domainName}</p>
-                </div>
-              </>
-            
-            :
-
-              <>
-                <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
-                    <p className="bg-orange-600 rounded-md text-white font-semibold p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
-                    onClick={e => setCreateProfileModalIsOpen(true)}>
-                      {"create profile"}
-                      </p>
-                </div>
-              </>
-            }
-
           <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-24'>
               <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
                 <div className='block pt-0 px-2 w-72 md:w-[36rem]'>
