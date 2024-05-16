@@ -6,16 +6,15 @@ import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
+//TODO: extract preference and skills from IPFS and display
 
 export default function ProfileBaord() {
   let accounts, CosmWasmClient, queryHandler;
+  const [domainName, setDomainName] = useState();
   const [availability, setAvailabilty] = useState();
   const [hourRate, setHourRate] = useState();
   const [ipfsHash, setIpfsHash] = useState()
-  const [createProfileModalIsOpen, setCreateProfileModalIsOpen] = useState(false);
   const [updateProfileModalIsOpen, setUpdateProfileModalIsOpen] = useState(false);
-  const [createNewProfileName, setCreateNewProfileName] = useState();
-  const [createNewProfileRate, setCreateNewProfileRate] = useState();
   const [portfolio, setPortforlio] = useState();
   const [skills, setSkills] = useState();
   const [remote, setRemote] = useState(false);
@@ -58,7 +57,8 @@ export default function ProfileBaord() {
           };
         
           try {
-            let {available, hour_rate } = await client.queryContractSmart(ContractAddress, entrypoint);
+            let {available, hour_rate, arch_id } = await client.queryContractSmart(ContractAddress, entrypoint);
+            setDomainName(arch_id);
             setAvailabilty(available);
             setHourRate(hour_rate);
           } catch (error) {
@@ -71,7 +71,7 @@ export default function ProfileBaord() {
             let res = await client.queryContractSmart(ContractAddress, entrypoint);
             let ipfsHash = res.meta_data.description;
             setIpfsHash(ipfsHash);
-            console.log("Profile", ipfsHash);
+            console.log("IPFS Hash: ", ipfsHash);
           } catch (error) {
             console.log(error)
           }
@@ -100,70 +100,7 @@ export default function ProfileBaord() {
     getProfile();
   }, [])
 
-  // create profile
- const createProfile = async() => {
-  if (window['keplr']) {
-    if (window.keplr['experimentalSuggestChain']) {
-      await window.keplr.enable(ChainInfo.chainId);
-      window.keplr.defaultOptions = {
-        sign: {
-          preferNoSetFee: true,    
-        }   
-      }
-
-      const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
-      CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
-      accounts = await offlineSigner.getAccounts();	// user accounts
-      queryHandler = CosmWasmClient.queryContractSmart;	// A less verbose reference to handle our queries	
-      
-      console.log('Wallet connected', {
-        offlineSigner: offlineSigner,
-        CosmWasmClient: CosmWasmClient,
-        accounts: accounts,
-        chain: ChainInfo,
-        queryHandler: queryHandler,
-      });
-
-      // create profile txn
-      const ContractAddress = CONTRACT_TESTNET_ADDRESS;
-      let cost = '1000000000000000000'
-      let funds = [{
-        denom: 'aconst',
-        amount: cost,
-      }]
-
-      const create_profile_entry_point = {
-        create_profile: {
-          name: createNewProfileName,
-          hour_rate: createNewProfileRate,
-          cost: cost
-        }
-      }
-      try {
-        let create_profile_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, create_profile_entry_point, 'auto', "Registering domain", funds);
-        console.log("Create Profile with txn hash", create_profile_tx);
-        toast.success("Hurray! Profile created successfully!!", {
-          position: toast.TOP_LEFT,
-          autoClose: 6000, // Close the toast after 3 seconds
-        })
-      } catch (error) {
-        toast.error('Oops! Could not create profile. Use a unique name', {
-          position: toast.TOP_LEFT,
-          autoClose: 6000, // Close the toast after 3 seconds
-        });
-        console.log(error)
-      }
-
-      setCreateProfileModalIsOpen(false)
-    } else {
-      console.warn('Error accessing experimental features, please update Keplr');
-
-    }
-  } else {
-    console.warn('Error accessing Keplr, please install Keplr');
-  }
- }  
-
+  
 const handleUpdateProfile = async() => {
   if (window['keplr']) {
     if (window.keplr['experimentalSuggestChain']) {
@@ -262,7 +199,7 @@ const handleUpdateProfile = async() => {
         console.log(error)
       }
 
-      setCreateProfileModalIsOpen(false)
+      setUpdateProfileModalIsOpen(false)
     } else {
       console.warn('Error accessing experimental features, please update Keplr');
 
@@ -277,38 +214,7 @@ const handleUpdateProfile = async() => {
     return (
         <>
         <ToastContainer />
-          <div className="md:w-12/12">
-            {
-              createProfileModalIsOpen && 
-              <>
-                 <dialog
-                    className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
-                    <div className="bg-white m-auto py-6 px-16 flex justify-center items-center border rounded-lg">
-                        <div className="flex flex-col items-center">
-                          <label className="text-orange-600 font-semibold">
-                            Name: {" "}
-                            <input 
-                              value={createNewProfileName}
-                              onChange={e => setCreateNewProfileName(e.currentTarget.value)}
-                              className="border border-md border-orange-600" type="text" name="name" 
-                            />
-                          </label> 
-                          <label className="text-orange-600 font-semibold pt-8">
-                            Rate: {" "}
-                            <input 
-                              value={createNewProfileRate}
-                              onChange={e => setCreateNewProfileRate(e.currentTarget.value)}
-                              className="border border-md border-orange-600" type="text" name="name" 
-                            />
-                          </label> 
-                          <br/>
-                          <button type="button" className="bg-orange-600 text-white p-2 rounded-md border-xl" onClick={createProfile}>Create Profile</button>
-                        </div>
-                    </div>
-                </dialog>
-              </> 
-            }
-              
+          <div className="md:w-12/12">              
 
             <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-24'>
               <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
@@ -347,7 +253,7 @@ const handleUpdateProfile = async() => {
                       <hr className=' border border-gray-200 h-6 mx-2 md:mx-4'></hr>
                       <p className='text-gray-900 text-base mb-2'>Contract</p>
                       <hr className=' border border-gray-200 h-6 mx-2 md:mx-4'></hr>
-                      <p className='text-gray-900 text-base mb-2'>${hourRate ? hourRate : "_"}/hr</p>
+                      <p className='text-gray-900 text-base mb-2'>$CONST {hourRate ? hourRate : "_"}/hr</p>
                     </div>
                   </div>
                 </div>
@@ -389,7 +295,7 @@ const handleUpdateProfile = async() => {
                           <label className="text-orange-600 font-semibold text-md">
                             portfolio: {" "}
                             <input 
-                              value={createNewProfileName}
+                              value={portfolio}
                               onChange={e => setPortforlio(e.currentTarget.value)}
                               placeholder="portfolio-site.com"
                               className="border border-md border-orange-600 ml-3 p-2 border rounded-md" type="text" name="name" 
@@ -398,7 +304,7 @@ const handleUpdateProfile = async() => {
                           <label className="text-orange-600 font-semibold pt-6 text-md">
                             skills: {" "}
                             <input 
-                              value={createNewProfileRate}
+                              value={skills}
                               onChange={e => setSkills(e.currentTarget.value)}
                               placeholder="skill_1, skill_2"
                               className="border border-md border-orange-600 ml-9 p-2 border rounded-md" type="text" name="name" 

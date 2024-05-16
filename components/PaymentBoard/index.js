@@ -95,6 +95,9 @@ export default function PaymentBoard() {
         }
       }
   
+      // TODO: integrate request payment, approve payment, reject payment
+      // TODO: display payment based on approval for withdraw/set button to withdraw
+      // TODO: integrate withdraw payment
 
     return (
         <>

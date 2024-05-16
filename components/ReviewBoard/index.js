@@ -1,3 +1,5 @@
+// TODO: add review to IPFS and push onchain
+// TODO: view job review by job ID
 export default function ReviewBoard() {
     return (
         <>
