@@ -1,6 +1,146 @@
-// TODO: add review to IPFS and push onchain
-// TODO: view job review by job ID
+// TODO:add integration to UI 
+import { SigningArchwayClient, ArchwayClient } from '@archwayhq/arch3.js';
+import ChainInfo from 'constantine.config';
+import {CONTRACT_TESTNET_ADDRESS, INFURA_API_KEY, INFURA_API_SECRET} from "@/constants";
+import { useEffect, useState} from "react";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
+let accounts, CosmWasmClient;
 export default function ReviewBoard() {
+  const [reviewIpfsHash, setReviewIpfsHash] = useState();
+  const [jobId, setJobId] = useState();
+  const [reviewContent, setReviewContent] = useState();
+
+  const handleViewJobReview = async() => {
+    if (window['keplr']) {
+      if (window.keplr['experimentalSuggestChain']) {
+        await window.keplr.enable(ChainInfo.chainId);
+        window.keplr.defaultOptions = {
+          sign: {
+            preferNoSetFee: true,    
+          }   
+        }
+  
+        const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
+        CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
+        accounts = await offlineSigner.getAccounts();	
+
+        // add review txn
+        const ContractAddress = CONTRACT_TESTNET_ADDRESS;
+        let cost = '1000000000000000000'
+        let funds = [{
+          denom: 'aconst',
+          amount: cost,
+        }]
+  
+        const view_review_entry_point = {
+          single_job: {
+            job_id:  jobId
+          }
+        }
+        try {
+          let view_review_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, view_review_entry_point, 'auto', "Viewing job review on Arch-Hub", funds);
+          console.log("Review viewed successfully", view_review_tx);
+        
+          toast.success("Hurray! review viewed successfully!!", {
+            position: toast.TOP_LEFT,
+            autoClose: 6000, // Close the toast after 3 seconds
+          })
+        } catch (error) {
+          toast.error('Oops! Could not create job.', {
+            position: toast.TOP_LEFT,
+            autoClose: 6000, // Close the toast after 3 seconds
+          });
+          console.log(error)
+        }
+  
+        setCreateJobModalIsOpen(false)
+      } else {
+        console.warn('Error accessing experimental features, please update Keplr');
+  
+      }
+    } else {
+      console.warn('Error accessing Keplr, please install Keplr');
+    }
+  }
+
+  const handleAddJobReview = async() => {
+    if (window['keplr']) {
+      if (window.keplr['experimentalSuggestChain']) {
+        await window.keplr.enable(ChainInfo.chainId);
+        window.keplr.defaultOptions = {
+          sign: {
+            preferNoSetFee: true,    
+          }   
+        }
+  
+        const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
+        CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
+        accounts = await offlineSigner.getAccounts();	
+
+        // add review to IPFS
+        const AuthHeader = 'Basic ' + Buffer.from(INFURA_API_KEY + ":" + INFURA_API_SECRET).toString('base64');
+
+          const ipfsClient = await create({
+            host: 'ipfs.infura.io',
+            port: 5001,
+            protocol: 'https',
+            headers: {
+              'Authorization': AuthHeader
+            }
+          });
+
+          
+          const jobReview = {
+            "job id": jobId,
+            "content": reviewContent,            
+          }
+
+        const profileMetadataJson = JSON.stringify(jobReview);
+        let {cid, path} = await ipfsClient.add(profileMetadataJson);
+        setReviewIpfsHash(path)
+        console.log("REVIEW ADDED TO IPFS with: ", path)
+  
+        // add review txn
+        const ContractAddress = CONTRACT_TESTNET_ADDRESS;
+        let cost = '1000000000000000000'
+        let funds = [{
+          denom: 'aconst',
+          amount: cost,
+        }]
+  
+        const add_review_entry_point = {
+          review: {
+            job_id: jobId,
+            review: reviewIpfsHash
+          }
+        }
+        try {
+          let add_review_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, add_review_entry_point, 'auto', "Adding job review on Arch-Hub", funds);
+          console.log("Review added successfully", add_review_tx);
+        
+          toast.success("Hurray! review added successfully!!", {
+            position: toast.TOP_LEFT,
+            autoClose: 6000, // Close the toast after 3 seconds
+          })
+        } catch (error) {
+          toast.error('Oops! Could not create job.', {
+            position: toast.TOP_LEFT,
+            autoClose: 6000, // Close the toast after 3 seconds
+          });
+          console.log(error)
+        }
+  
+        setCreateJobModalIsOpen(false)
+      } else {
+        console.warn('Error accessing experimental features, please update Keplr');
+  
+      }
+    } else {
+      console.warn('Error accessing Keplr, please install Keplr');
+    }
+  }
     return (
         <>
           <div className="md:w-12/12">

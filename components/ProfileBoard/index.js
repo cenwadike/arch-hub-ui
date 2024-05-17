@@ -5,8 +5,11 @@ import { create } from "ipfs-http-client";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 //TODO: extract preference and skills from IPFS and display
+//TODO: search for profile
+// display avalilable profiles
 
 export default function ProfileBaord() {
   let accounts, CosmWasmClient, queryHandler;
@@ -50,6 +53,7 @@ export default function ProfileBaord() {
           const ContractAddress = CONTRACT_TESTNET_ADDRESS;
           const client = await ArchwayClient.connect(ChainInfo.rpc);
           const address = accounts[0].address;
+
           const entrypoint = {
             profile: {
               id:  address
@@ -57,10 +61,11 @@ export default function ProfileBaord() {
           };
         
           try {
-            let {available, hour_rate, arch_id } = await client.queryContractSmart(ContractAddress, entrypoint);
+            let {available, hour_rate, arch_id, meta_data } = await client.queryContractSmart(ContractAddress, entrypoint);
             setDomainName(arch_id);
             setAvailabilty(available);
             setHourRate(hour_rate);
+            console.log("metadata ",meta_data)
           } catch (error) {
             console.log(error)
           }
@@ -87,8 +92,11 @@ export default function ProfileBaord() {
             }
           });
 
-          const offChainMetadata = ipfsClient.cat(ipfsHash);
-          console.log("Offchain metadata: ",offChainMetadata ); 
+          // const offChainMetadata = await ipfsClient.get(`https://ipfs.infura.io/ipfs/${ipfsHash}`);
+          let url = `https://ipfs.infura.io/ipfs/${ipfsHash}`;
+          const meta =  axios.get(url);
+          console.log("metadata: ", meta );
+          // console.log("Offchain metadata: ", offChainMetadata ); 
           
         } else {
           console.warn('Error accessing experimental features, please update Keplr');
@@ -118,6 +126,7 @@ const handleUpdateProfile = async() => {
       // get on-chain profile
       const contractAddress = CONTRACT_TESTNET_ADDRESS;
       const client = await ArchwayClient.connect(ChainInfo.rpc);
+
       const entrypoint = {
         profile: {
           id:  accounts[0].address
@@ -150,18 +159,13 @@ const handleUpdateProfile = async() => {
           "remote": remote,
           "enterprise": enterprise,
           "startup": startup
-        },
-        "reviews_given": [{
-          "reciver_address": "",
-          "text": "",
-          "created_at": ""
-        }],
+        }
       }
 
       const profileMetadataJson = JSON.stringify(profileMetadata);
       let {cid, path} = await ipfsClient.add(profileMetadataJson);
       setIpfsHash(path);
-      console.log("Ipfs upload successful: ", cid, path);
+      console.log("Ipfs upload successful: ", cid);
 
 
       // update profile txn
@@ -174,7 +178,7 @@ const handleUpdateProfile = async() => {
 
       const update_metadata_entry_point = {
         update_metadata: {
-          name: domainName,
+          name: "combeee",
           update: {
             description: ipfsHash,
             image: "'_'",

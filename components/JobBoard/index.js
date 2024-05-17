@@ -137,10 +137,10 @@ export default function JobBoard() {
             }
           }
           try {
-            let request_contractor_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, request_contractor_entry_point, 'auto', "Updating Arch-Hub profile metadata", funds);
+            let request_contractor_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, request_contractor_entry_point, 'auto', "Requesting contractor on Arch-Hub", funds);
             console.log("Update Profile metadata with txn hash", request_contractor_tx);
           
-            toast.success("Hurray! contractor requested successfully successfully!!", {
+            toast.success("Hurray! contractor requested successfully!!", {
               position: toast.TOP_LEFT,
               autoClose: 6000, // Close the toast after 3 seconds
             })
