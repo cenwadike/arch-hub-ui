@@ -1,6 +1,6 @@
 import { SigningArchwayClient, ArchwayClient } from '@archwayhq/arch3.js';
 import ChainInfo from 'constantine.config';
-import {CONTRACT_TESTNET_ADDRESS, INFURA_API_KEY, INFURA_API_SECRET} from "@/constants";
+import {CONTRACT_TESTNET_ADDRESS} from "@/constants";
 import { useEffect, useState} from "react";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -233,7 +233,6 @@ export default function JobBoard() {
       setCreateJobModalIsOpen(false);
     }
 
-    //TODO: view job using pop up modal and job id
     return (
         <>
           <ToastContainer />
@@ -354,49 +353,59 @@ export default function JobBoard() {
             <dialog
             className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
               <div className="bg-white m-auto py-6 px-16 flex justify-center items-center border rounded-lg">
-                  
-              <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
-                <div className='block pt-0 px-2 w-72 md:w-[36rem]'>
-                  <div className='inline-flex flex-col justify-start items-start'>
-                    <div className='flex justify-start'>
-                      <h className='text-orange-600 text-md font-semibold leading-tight mb-0 mr-24 md:mr-96'>
-                        {" "}
-                      </h>                      
-                    </div>
-                    <div className='flex justify-start'>
-                      <h className='text-orange-600 text-md font-semibold leading-tight mb-2 ml-12 md:mr-96'>
-                        {" "}
-                        Job id
-                      </h>                      
-                    </div>
-                    <div className='flex justify-start'>
-                      <h className='text-orange-600 text-md font-semibold leading-tight mb-2 ml-12 md:mr-96'>
-                        {" "}
-                        contractor id
-                      </h>                      
-                    </div>
-                    <div className='flex justify-start'>
-                      <h className='text-orange-600 text-md font-semibold leading-tight mb-2 ml-12 md:mr-96'>
-                        {" "}
-                        customer id
-                      </h>                      
-                    </div>
-                   
-                  </div>
-      
-                  <div className='inline-flex flex-col justify-end items-end'>
-                    <p className='text-gray-900 text-base mb-0'></p>
-                    <p className='text-orange-600 text-base mb-0'>{jobId}</p>
-
-                    <p className='text-orange-600 text-base mb-0'>{contractorId}</p>
-
-                    <p className='text-orange-600 text-base mb-0'>{customerId}</p>
-
-                  </div>
-                  
-                  
-                  </div> 
-                  </div>  
+                  <div className="flex flex-col items-center">
+                      <label className="text-orange-600 font-semibold text-md">
+                        job id: {" "}
+                        <input 
+                          placeholder={jobId}
+                          className="border border-md border-orange-600 p-2 ml-20 rounded-md" type="text" 
+                        />
+                      </label> 
+                      <label className="text-orange-600 font-semibold pt-6 pl-0 text-md">
+                        contractor id:
+                        <input 
+                          placeholder={contractorId}
+                          className="border border-md border-orange-600 ml-7 p-2 rounded-md" type="text" 
+                        />
+                      </label>
+                      <label className="text-orange-600 font-semibold pt-6 text-md">
+                        consumer id: {" "}
+                        <input 
+                          placeholder={customerId}
+                          className="border border-md border-orange-600 p-2 ml-8 rounded-md" type="text" 
+                        />
+                      </label> 
+                      <label className="text-orange-600 font-semibold pt-6 text-md">
+                        rate: {" "}
+                        <input 
+                          placeholder={jobRate}
+                          className="border border-md border-orange-600 p-2 ml-24 rounded-md" type="text" 
+                        />
+                      </label> 
+                      <label className="text-orange-600 font-semibold pt-6 text-md">
+                        duration: {" "}
+                        <input 
+                          placeholder={jobDuration}
+                          className="border border-md border-orange-600 p-2 ml-16 rounded-md" type="text" 
+                        />
+                      </label> 
+                      <label className="text-orange-600 font-semibold pt-6 text-md">
+                        start at: {" "}
+                        <input 
+                          placeholder={jobStartTime}
+                          className="border border-md border-orange-600 p-2 ml-16 rounded-md" type="text" 
+                        />
+                      </label> 
+                      <label className="text-orange-600 font-semibold pt-6 text-md">
+                        status: {" "}
+                        <input 
+                          placeholder={jobStatus}
+                          className="border border-md border-orange-600 p-2 ml-16 rounded-md" type="text" 
+                        />
+                      </label> 
+                    <br/>
+                    <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl hover:bg-orange-900 transition-all duration-300 ease-linear" onClick={e => setJobModalIsOpen(false)}>close</button> 
+                  </div>                
               </div>
             </dialog>
           }
