@@ -2,6 +2,7 @@ import { SigningArchwayClient, ArchwayClient } from '@archwayhq/arch3.js';
 import ChainInfo from 'constantine.config';
 import {CONTRACT_TESTNET_ADDRESS, INFURA_API_KEY, INFURA_API_SECRET} from "@/constants";
 import { create } from "ipfs-http-client";
+import makeIpfsFetch from "js-ipfs-fetch";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -92,11 +93,14 @@ export default function ProfileBaord() {
             }
           });
 
-          // const offChainMetadata = await ipfsClient.get(`https://ipfs.infura.io/ipfs/${ipfsHash}`);
-          let url = `https://ipfs.infura.io/ipfs/${ipfsHash}`;
-          const meta =  axios.get(url);
-          console.log("metadata: ", meta );
-          // console.log("Offchain metadata: ", offChainMetadata ); 
+          try {
+            const ipfsFetch = await makeIpfsFetch(ipfsClient);
+            // const offChainMetadata = ipfsClient.get(`https://ipfs.infura.io/ipfs/${ipfsHash}`);
+            const meta = await ipfsFetch(`https://ipfs.infura.io/ipfs/${ipfsHash}`)
+            console.log("Offchain metadata: ", JSON.stringify(meta) ); 
+          } catch (error) {
+            console.error(error)
+          }
           
         } else {
           console.warn('Error accessing experimental features, please update Keplr');
@@ -110,6 +114,7 @@ export default function ProfileBaord() {
 
   
 const handleUpdateProfile = async() => {
+  setUpdateProfileModalIsOpen(false)
   if (window['keplr']) {
     if (window.keplr['experimentalSuggestChain']) {
       await window.keplr.enable(ChainInfo.chainId);
@@ -165,7 +170,7 @@ const handleUpdateProfile = async() => {
       const profileMetadataJson = JSON.stringify(profileMetadata);
       let {cid, path} = await ipfsClient.add(profileMetadataJson);
       setIpfsHash(path);
-      console.log("Ipfs upload successful: ", cid);
+      console.log("Ipfs upload successful: ", path);
 
 
       // update profile txn
@@ -202,8 +207,7 @@ const handleUpdateProfile = async() => {
         });
         console.log(error)
       }
-
-      setUpdateProfileModalIsOpen(false)
+      
     } else {
       console.warn('Error accessing experimental features, please update Keplr');
 

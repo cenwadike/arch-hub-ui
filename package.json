@@ -15,6 +15,7 @@
     "bignumber.js": "^9.1.2",
     "eslint-config-next": "14.2.3",
     "ipfs-http-client": "^60.0.1",
+    "js-ipfs-fetch": "^5.0.0",
     "next": "14.2.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",

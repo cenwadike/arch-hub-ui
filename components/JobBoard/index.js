@@ -9,9 +9,17 @@ let accounts, CosmWasmClient;
 export default function JobBoard() {
   const [createJobModalIsOpen, setCreateJobModalIsOpen] = useState(false);
   const [viewJobModalIsOpen, setViewJobModalIsOpen] = useState(false)
-  const [assegnedContractor, setAssegnedContractor] = useState();
-  const [assignedPrice, setAssignedPrice] = useState();
+  const [assignedContractor, setassignedContractor] = useState();
+  const [assignedDuration, setassignedDuration] = useState();
   const [viewJobId, setViewJobId] = useState();
+  const [jobId, setJobId] = useState();
+  const [contractorId, setContractorId] = useState();
+  const [customerId, setCustomerId] = useState();
+  const [jobRate, setJobRate] = useState();
+  const [jobDuration, setJobDuration] = useState();
+  const [jobStatus, setJobStatus] = useState();
+  const [jobStartTime, setJobStartTime] = useState();
+  const [jobModalIsOpen, setJobModalIsOpen] = useState();
 
     useEffect( () => {
       async function handleLoadCreatedJobs() {
@@ -35,7 +43,7 @@ export default function JobBoard() {
             try {
               const msg = {
                 contractor_job: {
-                  account_id:  address,
+                  account_id:  "archway1jphqvc6pa7g4tnjpxznsn3nhzegj9fm090a5tr",
                 },
               };
             
@@ -82,7 +90,7 @@ export default function JobBoard() {
             try {
               const msg = {
                 customer_job: {
-                  account_id:  address,
+                  account_id:  "archway1jphqvc6pa7g4tnjpxznsn3nhzegj9fm090a5tr",
                 },
               };
             
@@ -129,12 +137,12 @@ export default function JobBoard() {
             amount: cost,
           }]
     
+          let duration = parseInt(assignedDuration)
           const request_contractor_entry_point = {
             job_request: {
-              contractor_domain: "waledayonin.arch",
-              contractor_account_id: "archway1jphqvc6pa7g4tnjpxznsn3nhzegj9fm090a5tr",
-              length: 1,
-            }
+              contractor_domain: assignedContractor,
+              duration: duration,
+          }
           }
           try {
             let request_contractor_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, request_contractor_entry_point, 'auto', "Requesting contractor on Arch-Hub", funds);
@@ -145,7 +153,7 @@ export default function JobBoard() {
               autoClose: 6000, // Close the toast after 3 seconds
             })
           } catch (error) {
-            toast.error('Oops! Could not create job.', {
+            toast.error('Oops! Could not create job. Contractor is not available', {
               position: toast.TOP_LEFT,
               autoClose: 6000, // Close the toast after 3 seconds
             });
@@ -153,6 +161,67 @@ export default function JobBoard() {
           }
     
           setCreateJobModalIsOpen(false)
+        } else {
+          console.warn('Error accessing experimental features, please update Keplr');
+    
+        }
+      } else {
+        console.warn('Error accessing Keplr, please install Keplr');
+      }
+    
+      setCreateJobModalIsOpen(false);
+    }
+
+    const handleViewJob = async() => {
+      setViewJobModalIsOpen(false)
+      setJobModalIsOpen(true)
+
+      if (window['keplr']) {
+        if (window.keplr['experimentalSuggestChain']) {
+          await window.keplr.enable(ChainInfo.chainId);
+          window.keplr.defaultOptions = {
+            sign: {
+              preferNoSetFee: true,    
+            }   
+          }
+    
+          const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
+          CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
+          accounts = await offlineSigner.getAccounts();	
+    
+          // update profile txn
+          const contractAddress = CONTRACT_TESTNET_ADDRESS;
+            const client = await ArchwayClient.connect(ChainInfo.rpc);
+    
+            
+
+            try {
+              let id = parseInt(viewJobId)
+              const msg = {
+                single_job: {
+                    job_id:  id
+                },
+              };
+            
+              const {job_id, customer_domain, contrator_domain, rate, length, status, start_time} = await client.queryContractSmart(
+                contractAddress,
+                msg
+              );
+            
+              setJobId(job_id)
+              setCustomerId(customer_domain);
+              setContractorId(contrator_domain);
+              setJobRate(rate);
+              setJobDuration(length);
+              setJobStatus(status);
+              setJobStartTime(start_time);
+
+              console.log("single job: ", jobId, contractorId, customerId, jobDuration, jobRate, jobStartTime, jobStartTime);
+
+            } catch (error) {
+              console.error(error)
+            }
+
         } else {
           console.warn('Error accessing experimental features, please update Keplr');
     
@@ -234,19 +303,19 @@ export default function JobBoard() {
                       <label className="text-orange-600 font-semibold text-md">
                         contractor id: {" "}
                         <input 
-                          value={assegnedContractor}
-                          onChange={e => setAssegnedContractor(e.currentTarget.value)}
+                          value={assignedContractor}
+                          onChange={e => setassignedContractor(e.currentTarget.value)}
                           placeholder="name.arch"
-                          className="border border-md border-orange-600 ml-3 p-2 border rounded-md" type="text" name="name" 
+                          className="border border-md border-orange-600  p-2 ml-10 rounded-md" type="text" name="name" 
                         />
                       </label> 
-                      <label className="text-orange-600 font-semibold pt-6 pl-7 text-md">
-                        quote: {" "}
+                      <label className="text-orange-600 font-semibold pt-6 pl-0 text-md">
+                        duration (hrs):
                         <input 
-                          value={assignedPrice}
-                          onChange={e => setAssignedPrice(e.currentTarget.value)}
+                          value={assignedDuration}
+                          onChange={e => setassignedDuration(e.currentTarget.value)}
                           placeholder="100"
-                          className="border border-md border-orange-600 ml-9 p-2 border rounded-md" type="text" name="name" 
+                          className="border border-md border-orange-600 ml-9 p-2 rounded-md" type="text" name="name" 
                         />
                       </label>
                     <br/>
@@ -268,12 +337,66 @@ export default function JobBoard() {
                           value={viewJobId}
                           onChange={e => setViewJobId(e.currentTarget.value)}
                           placeholder="1"
-                          className="border border-md border-orange-600 ml-3 p-2 border rounded-md" type="text" name="name" 
+                          className="border border-md border-orange-600 ml-3 p-2 border rounded-md" 
+                          type="text"
+                          name="name" 
                         />
                       </label> 
                     <br/>
-                    <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl hover:bg-orange-900 transition-all duration-300 ease-linear" onClick={e => setViewJobModalIsOpen(false)}>confirm</button> 
+                    <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl hover:bg-orange-900 transition-all duration-300 ease-linear" onClick={handleViewJob}>confirm</button> 
                   </div>                
+              </div>
+            </dialog>
+          }
+
+          { 
+            jobModalIsOpen &&
+            <dialog
+            className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
+              <div className="bg-white m-auto py-6 px-16 flex justify-center items-center border rounded-lg">
+                  
+              <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
+                <div className='block pt-0 px-2 w-72 md:w-[36rem]'>
+                  <div className='inline-flex flex-col justify-start items-start'>
+                    <div className='flex justify-start'>
+                      <h className='text-orange-600 text-md font-semibold leading-tight mb-0 mr-24 md:mr-96'>
+                        {" "}
+                      </h>                      
+                    </div>
+                    <div className='flex justify-start'>
+                      <h className='text-orange-600 text-md font-semibold leading-tight mb-2 ml-12 md:mr-96'>
+                        {" "}
+                        Job id
+                      </h>                      
+                    </div>
+                    <div className='flex justify-start'>
+                      <h className='text-orange-600 text-md font-semibold leading-tight mb-2 ml-12 md:mr-96'>
+                        {" "}
+                        contractor id
+                      </h>                      
+                    </div>
+                    <div className='flex justify-start'>
+                      <h className='text-orange-600 text-md font-semibold leading-tight mb-2 ml-12 md:mr-96'>
+                        {" "}
+                        customer id
+                      </h>                      
+                    </div>
+                   
+                  </div>
+      
+                  <div className='inline-flex flex-col justify-end items-end'>
+                    <p className='text-gray-900 text-base mb-0'></p>
+                    <p className='text-orange-600 text-base mb-0'>{jobId}</p>
+
+                    <p className='text-orange-600 text-base mb-0'>{contractorId}</p>
+
+                    <p className='text-orange-600 text-base mb-0'>{customerId}</p>
+
+                  </div>
+                  
+                  
+                  </div> 
+                  </div>  
               </div>
             </dialog>
           }

@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 let accounts, CosmWasmClient;
 export default function StatusBoard() {
   const [availability, setAvailabilty] = useState();
+  const [domainName, setDomainName] = useState();
 
     // get profile
     useEffect(() => {
@@ -37,6 +38,7 @@ export default function StatusBoard() {
             try {
               let {arch_id, available } = await client.queryContractSmart(ContractAddress, entrypoint);
               setAvailabilty(available);
+              setDomainName(arch_id)
             } catch (error) {
               console.log(error)
             }
