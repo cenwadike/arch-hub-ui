@@ -43,7 +43,7 @@ export default function JobBoard() {
             try {
               const msg = {
                 contractor_job: {
-                  account_id:  "archway1jphqvc6pa7g4tnjpxznsn3nhzegj9fm090a5tr",
+                  account_id:  address,
                 },
               };
             
@@ -90,7 +90,7 @@ export default function JobBoard() {
             try {
               const msg = {
                 customer_job: {
-                  account_id:  "archway1jphqvc6pa7g4tnjpxznsn3nhzegj9fm090a5tr",
+                  account_id: address,
                 },
               };
             

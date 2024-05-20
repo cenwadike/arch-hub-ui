@@ -6,11 +6,10 @@ import makeIpfsFetch from "js-ipfs-fetch";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import axios from 'axios';
+import {concat} from 'uint8arrays'
 
-//TODO: extract preference and skills from IPFS and display
 //TODO: search for profile
-// display avalilable profiles
+// TODO: display avalilable profiles
 
 export default function ProfileBaord() {
   let accounts, CosmWasmClient, queryHandler;
@@ -26,6 +25,9 @@ export default function ProfileBaord() {
   const [fullTime, setFullTime] = useState(false);
   const [startup, setStartup] = useState(false);
   const [enterprise, setEnterprise] = useState(false);
+  const [offChainSkills, setOffChainSkills] = useState();
+  const [offChainRemote, setOffChainRemote] = useState()
+  const [offChainContract, setOffChainContract] = useState();
 
   // get profile
   useEffect(() => {
@@ -94,10 +96,17 @@ export default function ProfileBaord() {
           });
 
           try {
-            const ipfsFetch = await makeIpfsFetch(ipfsClient);
-            // const offChainMetadata = ipfsClient.get(`https://ipfs.infura.io/ipfs/${ipfsHash}`);
-            const meta = await ipfsFetch(`https://ipfs.infura.io/ipfs/${ipfsHash}`)
-            console.log("Offchain metadata: ", JSON.stringify(meta) ); 
+            let chunks = [];
+            for await (const chunk of ipfsClient.cat(ipfsHash)) {
+              chunks.push(chunk);
+            }
+            
+            const data = concat(chunks)
+            const decodedData = JSON.parse(new TextDecoder().decode(data));
+            setOffChainSkills(decodedData.skills)
+            setOffChainRemote(decodedData.preferences.remote)
+            setOffChainContract(decodedData.preferences.contract)
+            console.log("Offchain metadata: ", decodedData ); 
           } catch (error) {
             console.error(error)
           }
@@ -183,7 +192,7 @@ const handleUpdateProfile = async() => {
 
       const update_metadata_entry_point = {
         update_metadata: {
-          name: "combeee",
+          name: domainName,
           update: {
             description: ipfsHash,
             image: "'_'",
@@ -235,11 +244,7 @@ const handleUpdateProfile = async() => {
                       </h>
                     </div>
                     <div className='inline-flex flex-row'>
-                      <p className='text-gray-900 text-base mb-2'>technical writing</p>
-                      <hr className=' border border-gray-200 h-6 mx-2 md:mx-4'></hr>
-                      <p className='text-gray-900 text-base mb-2'>Copy writing</p>
-                      <hr className=' border border-gray-200 h-6 mx-2 md:mx-4'></hr>
-                      <p className='text-gray-900 text-base mb-2'>Social media marketing</p>
+                      <p className='text-gray-900 text-base mb-2'>{offChainSkills}</p>
                     </div>
                   </div>
                 </div>
@@ -257,11 +262,11 @@ const handleUpdateProfile = async() => {
                       </h>
                     </div>
                     <div className='inline-flex flex-row'>
-                      <p className='text-gray-900 text-base mb-2'>Remote</p>
+                      <p className='text-gray-900 text-base mb-2'>{offChainRemote ? "Remote" : "Office"}</p>
                       <hr className=' border border-gray-200 h-6 mx-2 md:mx-4'></hr>
-                      <p className='text-gray-900 text-base mb-2'>Contract</p>
+                      <p className='text-gray-900 text-base mb-2'>{offChainContract ? "Contract" : "Fulltime"}</p>
                       <hr className=' border border-gray-200 h-6 mx-2 md:mx-4'></hr>
-                      <p className='text-gray-900 text-base mb-2'>$CONST {hourRate ? hourRate : "_"}/hr</p>
+                      <p className='text-gray-900 text-base mb-2'>$ACONST {hourRate ? hourRate : "_"}/hr</p>
                     </div>
                   </div>
                 </div>
