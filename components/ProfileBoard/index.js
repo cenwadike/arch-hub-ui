@@ -279,7 +279,7 @@ useEffect(() => {
 loadProfiles();
 }, [])
 
-const profilesComponent = profiless.map((profile) => {<li>{profile}</li>});
+const arrayDataItems = profiless.map((profile) => {<li>{profile}</li>});
 
 const findProfile = async() => {
   setFindProfileModalIsOpen(false);
@@ -523,27 +523,38 @@ const findProfile = async() => {
                   </div>
                 </dialog>
               }
-              <div className='flex flex-row items-center content-center justify-center'>
-              <table className='table-column-group absolute top-24 left-40 divide-y divide-gray-200 border text-orange-600'> 
-                <thead>
-                  <tr>
-                    <th className='px-12 py-4'>name</th>
-                    <th className='px-12 py-4'>availability</th>
-                    <th className='px-12 py-4'>rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  
-                    <ul className='text-orange-600 text-center text-3xl'>{profilesComponent}</ul>
-                    {/* // <tr key={profile}>
-                    //   <td>{profile.arch_id}</td>
-                    //   <td>{profile.availability}</td>
-                    //   <td>{profile.hour_rate}</td>
-                    // </tr> */}
-                  
-                 
-                </tbody>
-              </table>
+            </div>{" "}
+
+            <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-24'>
+              <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
+                <div className='block pt-0 px-2 w-72 md:w-[36rem]'>
+                  <div className='inline-flex flex-col justify-start items-start'>
+                    <div className='flex justify-start'>
+                      <h className='text-orange-600 text-md font-bold leading-tight mb-2 mr-24 md:mr-96'>
+                        {" "}
+                        PROFILES
+                      </h>
+                    </div>
+                    <div className='' >
+                      <table className='divide-gray-200 text-orange-600'> 
+                        <thead>
+                          <tr>
+                            <th className='px-16 py-4'>names</th>
+                            <th className='px-16 py-4'>rates ($CONST)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {profiless.map(profile => 
+                            <tr key={profile.arch_id}>
+                              <td className='px-28 py-4'>{profile.arch_id}</td>
+                              <td className='px-28 py-4'>{profile.hour_rate}</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>{" "}
           </div>         
