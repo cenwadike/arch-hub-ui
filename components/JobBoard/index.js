@@ -228,9 +228,7 @@ export default function JobBoard() {
         }
       } else {
         console.warn('Error accessing Keplr, please install Keplr');
-      }
-    
-      setCreateJobModalIsOpen(false);
+      }    
     }
 
     const handleViewJob = async() => {
@@ -343,7 +341,7 @@ export default function JobBoard() {
                       <table className='divide-gray-200 text-orange-600'> 
                         <thead>
                           <tr>
-                            <th className='px-36 py-4'>job ids</th>
+                            <th className='px-36 py-4 pr-32'>job ids</th>
                             <th className='px-36 py-4'>status</th>
                           </tr>
                         </thead>
