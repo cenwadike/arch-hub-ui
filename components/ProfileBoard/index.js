@@ -8,9 +8,6 @@ import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import {concat} from 'uint8arrays'
 
-//TODO: search for profile
-// TODO: display avalilable profiles
-
 export default function ProfileBaord() {
   let accounts, CosmWasmClient, queryHandler;
   const [domainName, setDomainName] = useState();
@@ -28,6 +25,13 @@ export default function ProfileBaord() {
   const [offChainSkills, setOffChainSkills] = useState();
   const [offChainRemote, setOffChainRemote] = useState()
   const [offChainContract, setOffChainContract] = useState();
+  const [profilesModalIsOpen, setProfilesModalIsOpen] = useState(false);
+  const [findProfileModalIsOpen, setFindProfileModalIsOpen] = useState(false);
+  const [findProfileId, setFindProfileId] = useState();
+  const [findProfileDomainName, setFindProfileDomainName] = useState();
+  const [findProfileAvailability, setFindProfileAvailability] = useState();
+  const [findProfileRate, setFindProfileRate] = useState();
+  const [profiless, setProfiles] = useState([]);
 
   // get profile
   useEffect(() => {
@@ -102,11 +106,11 @@ export default function ProfileBaord() {
             }
             
             const data = concat(chunks)
-            const decodedData = JSON.parse(new TextDecoder().decode(data));
+            const decodedData = JSON.parse(new TextDecoder().decode(data).toString());
             setOffChainSkills(decodedData.skills)
             setOffChainRemote(decodedData.preferences.remote)
             setOffChainContract(decodedData.preferences.contract)
-            console.log("Offchain metadata: ", decodedData ); 
+            console.log("Offchain metadata: ", decodedData.skills ); 
           } catch (error) {
             console.error(error)
           }
@@ -179,6 +183,7 @@ const handleUpdateProfile = async() => {
       const profileMetadataJson = JSON.stringify(profileMetadata);
       let {cid, path} = await ipfsClient.add(profileMetadataJson);
       setIpfsHash(path);
+
       console.log("Ipfs upload successful: ", path);
 
 
@@ -194,7 +199,7 @@ const handleUpdateProfile = async() => {
         update_metadata: {
           name: domainName,
           update: {
-            description: ipfsHash,
+            description: path,
             image: "'_'",
             accounts: [{username: "archid-protocol",profile: "https://github.com/archid-protocol",account_type: "github",verfication_hash: null}],
             websites: [{url: "https://archid.app",domain: "dapp.archid.arch",verfication_hash: null}]
@@ -227,6 +232,99 @@ const handleUpdateProfile = async() => {
 
   setUpdateProfileModalIsOpen(false);
 }
+
+
+// load profiles
+useEffect(() => {
+  async function loadProfiles() {
+  if (window['keplr']) {
+    if (window.keplr['experimentalSuggestChain']) {
+      await window.keplr.enable(ChainInfo.chainId);
+      window.keplr.defaultOptions = {
+        sign: {
+          preferNoSetFee: true,    
+        }   
+      }
+
+      const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
+      CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
+      accounts = await offlineSigner.getAccounts();	// user accounts
+      queryHandler = CosmWasmClient.queryContractSmart;	// A less verbose reference to handle our queries	
+      
+      const ContractAddress = CONTRACT_TESTNET_ADDRESS;
+      const client = await ArchwayClient.connect(ChainInfo.rpc);
+
+      const entrypoint = {
+        users: {
+          start_after: 0,
+          limit: 50
+      },
+      };
+    
+      try {
+        let {profiles} = await client.queryContractSmart(ContractAddress, entrypoint);
+        console.log("pro: ", profiles.map(profile => profile.arch_id))
+        setProfiles(profiles);
+        console.log("profiles ",profiless);
+      } catch (error) {
+        console.log(error)
+      }
+    } else {
+      console.warn('Error accessing experimental features, please update Keplr');
+    }
+  } else {
+    console.warn('Error accessing Keplr, please install Keplr');
+  }
+}
+loadProfiles();
+}, [])
+
+const profilesComponent = profiless.map((profile) => {<li>{profile}</li>});
+
+const findProfile = async() => {
+  setFindProfileModalIsOpen(false);
+
+  if (window['keplr']) {
+    if (window.keplr['experimentalSuggestChain']) {
+      await window.keplr.enable(ChainInfo.chainId);
+      window.keplr.defaultOptions = {
+        sign: {
+          preferNoSetFee: true,    
+        }   
+      }
+
+      const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
+      CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
+      accounts = await offlineSigner.getAccounts();	// user accounts
+      queryHandler = CosmWasmClient.queryContractSmart;	// A less verbose reference to handle our queries	
+      
+      const ContractAddress = CONTRACT_TESTNET_ADDRESS;
+      const client = await ArchwayClient.connect(ChainInfo.rpc);
+
+      const entrypoint = {
+        profile_by_name: {
+          name: findProfileId
+        },
+      };
+    
+      try {
+        let {arch_id, available, hour_rate} = await client.queryContractSmart(ContractAddress, entrypoint);
+        setFindProfileDomainName(arch_id);
+        setFindProfileAvailability(available);
+        setFindProfileRate(hour_rate);
+        console.log("single profile ", findProfileDomainName);
+      } catch (error) {
+        console.log(error)
+      }
+      setProfilesModalIsOpen(true);
+    } else {
+      console.warn('Error accessing experimental features, please update Keplr');
+    }
+  } else {
+    console.warn('Error accessing Keplr, please install Keplr');
+  }
+}
+
 
     return (
         <>
@@ -266,7 +364,7 @@ const handleUpdateProfile = async() => {
                       <hr className=' border border-gray-200 h-6 mx-2 md:mx-4'></hr>
                       <p className='text-gray-900 text-base mb-2'>{offChainContract ? "Contract" : "Fulltime"}</p>
                       <hr className=' border border-gray-200 h-6 mx-2 md:mx-4'></hr>
-                      <p className='text-gray-900 text-base mb-2'>$ACONST {hourRate ? hourRate : "_"}/hr</p>
+                      <p className='text-gray-900 text-base mb-2'>$CONST {hourRate ? hourRate : "_"}/hr</p>
                     </div>
                   </div>
                 </div>
@@ -291,12 +389,16 @@ const handleUpdateProfile = async() => {
               </div>
             </div>{" "}
 
-            <div className='flex justify-center content-center items-center md:ml-44 mt-12 ml-24'>
-              <div className='flex flex-row justify-center items-center  content-center p-2 mx-8 bg-opacity-100'>
-              <p className="bg-orange-600 rounded-md text-white font-semibold py-3 px-24 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
-                onClick={e => setUpdateProfileModalIsOpen(true)}>
-                  update profile
-              </p>
+            <div className='flex flex-row justify-center items-center content-center pt-12 mx-8 bg-opacity-100'>
+              <div className='flex flex-row justify-center items-center content-center pt-12 mx-8 bg-opacity-100'>
+                <p className="bg-orange-600 rounded-md text-white font-semibold mx-48 py-3 px-28 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
+                  onClick={e => setUpdateProfileModalIsOpen(true)}>
+                    update profile
+                </p>
+                <p className="bg-orange-600 rounded-md text-center text-white font-semibold mx-12 py-3 px-24 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
+                  onClick={e => setFindProfileModalIsOpen(true)}>
+                    find profiles
+                </p>
               </div>
 
               {
@@ -363,6 +465,86 @@ const handleUpdateProfile = async() => {
                     </div>
                 </dialog>
               }
+              {
+                findProfileModalIsOpen &&
+                <dialog
+                className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
+                  <div className="bg-white m-auto py-6 px-16 flex justify-center items-center border rounded-lg">
+                      <div className="flex flex-col items-center">
+                      <label className="text-orange-600 font-semibold text-md">
+                            name: {" "}
+                            <input 
+                              value={findProfileId}
+                              onChange={e => setFindProfileId(e.currentTarget.value)}
+                              placeholder="name.arch"
+                              className="border border-md border-orange-600 ml-3 p-2 border rounded-md" 
+                              type="text" 
+                            />
+                          </label> 
+                        <br/>
+                        <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl hover:bg-orange-900 transition-all duration-300 ease-linear" onClick={findProfile}>confirm</button> 
+                      </div>                
+                  </div>
+                </dialog>
+              }
+              {
+                profilesModalIsOpen &&
+                <dialog
+                className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
+                  <div className="bg-white m-auto py-6 px-16 flex justify-center items-center border rounded-lg">
+                      <div className="flex flex-col items-center">
+                          <label className="text-orange-600 font-semibold text-md">
+                            name: {" "}
+                            <input 
+                              placeholder={findProfileDomainName}
+                              className="border border-md border-orange-600 p-2 ml-24 rounded-md" type="text" 
+                              readOnly
+                            />
+                          </label> 
+                          <label className="text-orange-600 font-semibold pt-6 pl-0 text-md">
+                            availability:
+                            <input 
+                              placeholder={findProfileAvailability ? "available" : "occupied"}
+                              className="border border-md border-orange-600 ml-16 p-2 rounded-md" type="text" 
+                              readOnly
+                            />
+                          </label>
+                          <label className="text-orange-600 font-semibold pt-6 text-md">
+                            rate: {"$CONST"}
+                            <input 
+                              placeholder={findProfileRate}
+                              className="border border-md border-orange-600 p-2 ml-12 rounded-md" type="text"
+                              readOnly 
+                            />
+                          </label> 
+                        <br/>
+                        <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl hover:bg-orange-900 transition-all duration-300 ease-linear" onClick={e => setProfilesModalIsOpen(false)}>close</button> 
+                      </div>                
+                  </div>
+                </dialog>
+              }
+              <div className='flex flex-row items-center content-center justify-center'>
+              <table className='table-column-group absolute top-24 left-40 divide-y divide-gray-200 border text-orange-600'> 
+                <thead>
+                  <tr>
+                    <th className='px-12 py-4'>name</th>
+                    <th className='px-12 py-4'>availability</th>
+                    <th className='px-12 py-4'>rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                    <ul className='text-orange-600 text-center text-3xl'>{profilesComponent}</ul>
+                    {/* // <tr key={profile}>
+                    //   <td>{profile.arch_id}</td>
+                    //   <td>{profile.availability}</td>
+                    //   <td>{profile.hour_rate}</td>
+                    // </tr> */}
+                  
+                 
+                </tbody>
+              </table>
+              </div>
             </div>{" "}
           </div>         
         </>

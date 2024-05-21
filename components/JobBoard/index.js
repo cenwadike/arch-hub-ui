@@ -192,9 +192,7 @@ export default function JobBoard() {
           // update profile txn
           const contractAddress = CONTRACT_TESTNET_ADDRESS;
             const client = await ArchwayClient.connect(ChainInfo.rpc);
-    
             
-
             try {
               let id = parseInt(viewJobId)
               const msg = {
@@ -359,6 +357,7 @@ export default function JobBoard() {
                         <input 
                           placeholder={jobId}
                           className="border border-md border-orange-600 p-2 ml-20 rounded-md" type="text" 
+                          readOnly
                         />
                       </label> 
                       <label className="text-orange-600 font-semibold pt-6 pl-0 text-md">
@@ -366,13 +365,15 @@ export default function JobBoard() {
                         <input 
                           placeholder={contractorId}
                           className="border border-md border-orange-600 ml-7 p-2 rounded-md" type="text" 
+                          readOnly
                         />
                       </label>
                       <label className="text-orange-600 font-semibold pt-6 text-md">
                         consumer id: {" "}
                         <input 
                           placeholder={customerId}
-                          className="border border-md border-orange-600 p-2 ml-8 rounded-md" type="text" 
+                          className="border border-md border-orange-600 p-2 ml-8 rounded-md" type="text"
+                          readOnly 
                         />
                       </label> 
                       <label className="text-orange-600 font-semibold pt-6 text-md">
@@ -380,6 +381,7 @@ export default function JobBoard() {
                         <input 
                           placeholder={jobRate}
                           className="border border-md border-orange-600 p-2 ml-24 rounded-md" type="text" 
+                          readOnly
                         />
                       </label> 
                       <label className="text-orange-600 font-semibold pt-6 text-md">
@@ -387,6 +389,7 @@ export default function JobBoard() {
                         <input 
                           placeholder={jobDuration}
                           className="border border-md border-orange-600 p-2 ml-16 rounded-md" type="text" 
+                          readOnly
                         />
                       </label> 
                       <label className="text-orange-600 font-semibold pt-6 text-md">
@@ -394,6 +397,7 @@ export default function JobBoard() {
                         <input 
                           placeholder={jobStartTime}
                           className="border border-md border-orange-600 p-2 ml-16 rounded-md" type="text" 
+                          readOnly
                         />
                       </label> 
                       <label className="text-orange-600 font-semibold pt-6 text-md">
@@ -401,6 +405,7 @@ export default function JobBoard() {
                         <input 
                           placeholder={jobStatus}
                           className="border border-md border-orange-600 p-2 ml-16 rounded-md" type="text" 
+                          readOnly
                         />
                       </label> 
                     <br/>
