@@ -1,10 +1,10 @@
-// TODO:add integration to UI 
 import { SigningArchwayClient, ArchwayClient } from '@archwayhq/arch3.js';
 import ChainInfo from 'constantine.config';
 import {CONTRACT_TESTNET_ADDRESS, INFURA_API_KEY, INFURA_API_SECRET} from "@/constants";
 import { useEffect, useState} from "react";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import { create } from "ipfs-http-client";
 
 let accounts, CosmWasmClient;
 export default function ReviewBoard() {
@@ -15,8 +15,6 @@ export default function ReviewBoard() {
   const [viewJobReviewModalIsOpen, setViewJobReviewModalIsOpen] = useState();
 
   const handleViewJobReview = async() => {
-    setViewJobReviewModalIsOpen(false)
-
     if (window['keplr']) {
       if (window.keplr['experimentalSuggestChain']) {
         await window.keplr.enable(ChainInfo.chainId);
@@ -38,9 +36,10 @@ export default function ReviewBoard() {
           amount: cost,
         }]
   
+        const job_id = parseInt(jobId)
         const view_review_entry_point = {
           review: {
-            job_id:  jobId,
+            job_id:  job_id,
           },
         }
         try {
@@ -48,17 +47,19 @@ export default function ReviewBoard() {
           const view_review_tx = await client.queryContractSmart(ContractAddress, view_review_entry_point);
           console.log("Review viewed successfully", view_review_tx);
         
-          toast.success("Hurray! review viewed successfully!!", {
+          toast.success("Hurray! review loaded successfully!!", {
             position: toast.TOP_LEFT,
             autoClose: 6000, // Close the toast after 3 seconds
           })
         } catch (error) {
-          toast.error('Oops! Could not create job.', {
+          toast.error('Oops! No review found', {
             position: toast.TOP_LEFT,
             autoClose: 6000, // Close the toast after 3 seconds
           });
           console.log(error)
         }
+
+      setViewJobReviewModalIsOpen(false);
       } else {
         console.warn('Error accessing experimental features, please update Keplr');
   
@@ -67,6 +68,7 @@ export default function ReviewBoard() {
       console.warn('Error accessing Keplr, please install Keplr');
     }
   }
+
 
   const handleAddJobReview = async() => {
     if (window['keplr']) {
@@ -113,10 +115,11 @@ export default function ReviewBoard() {
           amount: cost,
         }]
   
+        const job_id = parseInt(jobId)
         const add_review_entry_point = {
           review: {
-            job_id: jobId,
-            review: reviewIpfsHash
+            job_id: job_id,
+            review: path
           }
         }
         try {
@@ -128,14 +131,14 @@ export default function ReviewBoard() {
             autoClose: 6000, // Close the toast after 3 seconds
           })
         } catch (error) {
-          toast.error('Oops! Could not create job.', {
+          toast.error('Oops! Could not add review. Try again with more gas', {
             position: toast.TOP_LEFT,
             autoClose: 6000, // Close the toast after 3 seconds
           });
           console.log(error)
         }
   
-        setCreateJobModalIsOpen(false)
+        setCreateJobReviewModalIsOpen(false)
       } else {
         console.warn('Error accessing experimental features, please update Keplr');
   
@@ -148,29 +151,35 @@ export default function ReviewBoard() {
         <>
         <ToastContainer />
           <div className="md:w-12/12">
-            <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-6'>
-              <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
-                <div className='block pt-0 px-2 w-72 md:w-[36rem]'>
-                  <div className='inline-flex flex-col justify-start items-start'>
-                    <div className='flex justify-start'>
-                      <h className='text-orange-600 text-md font-semibold leading-tight mb-2 mr-24 md:mr-96'>
-                        {" "}
-                        Job reviews
-                      </h>
-                    </div>
-                    <div className='inline-flex flex-row'>
-                      <p className='text-gray-900 text-base mb-2'>job id</p>
-                    </div>
-                  </div>
-      
-                  <div className='inline-flex flex-col'>
-                    <p className='text-gray-900 text-base mb-2'></p>
-                    <p className='text-blue-600 text-base mb-2'
-                      onClick={e => setViewJobReviewModalIsOpen(true)}>view</p>
-                  </div>
+            <div className='flex flex-row justify-center items-center content-center pt-12 mx-8 bg-opacity-100'>
+            <p className="bg-orange-600 rounded-md text-white font-semibold mx-48 py-3 px-24 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
+              onClick={e => setViewJobReviewModalIsOpen(true)}>
+                view job review
+            </p>
+            </div>
+
+            {
+              viewJobReviewModalIsOpen &&
+              <dialog
+              className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
+                <div className="bg-white m-auto py-6 px-16 flex justify-center items-center border rounded-lg">
+                    <div className="flex flex-col items-center">
+                        <label className="text-orange-600 font-semibold text-md">
+                          job id
+                          <input 
+                            value={jobId}
+                            onChange={e => setJobId(e.currentTarget.value)}
+                            placeholder="job id"
+                            className="border-md border-orange-600 ml-3 mb-6 p-2 border rounded-md" type="text" name="name" 
+                          />
+                        </label>
+                      <br/>
+                      <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl hover:bg-orange-900 transition-all duration-300 ease-linear" onClick={handleViewJobReview}>confirm</button> 
+                    </div>                
                 </div>
-              </div>
-            </div>{" "}
+              </dialog>
+            }
+
             <div className='flex flex-row justify-center items-center content-center pt-12 mx-8 bg-opacity-100'>
             <p className="bg-orange-600 rounded-md text-white font-semibold mx-48 py-3 px-24 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
               onClick={e => setCreateJobReviewModalIsOpen(true)}>
@@ -179,22 +188,30 @@ export default function ReviewBoard() {
             </div>
 
         {
-          viewJobReviewModalIsOpen &&
+          createJobReviewModalIsOpen &&
           <dialog
           className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
             <div className="bg-white m-auto py-6 px-16 flex justify-center items-center border rounded-lg">
                 <div className="flex flex-col items-center">
                     <label className="text-orange-600 font-semibold text-md">
-                      job id: {" "}
                       <input 
                         value={jobId}
                         onChange={e => setJobId(e.currentTarget.value)}
-                        placeholder="1"
-                        className="border border-md border-orange-600 ml-3 p-2 border rounded-md" type="text" name="name" 
+                        placeholder="job id"
+                        className="border-md border-orange-600 ml-3 mb-6 p-2 border rounded-md" type="text" name="name" 
+                      />
+                    </label> 
+                    <label className="text-orange-600 font-semibold text-md">
+                      
+                      <textarea 
+                        value={reviewContent}
+                        onChange={e => setReviewContent(e.currentTarget.value)}
+                        placeholder="review content"
+                        className="border-md border-orange-600 ml-3 p-2 border rounded-md" type="text" name="name" 
                       />
                     </label> 
                   <br/>
-                  <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl hover:bg-orange-900 transition-all duration-300 ease-linear" onClick={handleViewJobReview}>confirm</button> 
+                  <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl hover:bg-orange-900 transition-all duration-300 ease-linear" onClick={handleAddJobReview}>confirm</button> 
                 </div>                
             </div>
           </dialog>
