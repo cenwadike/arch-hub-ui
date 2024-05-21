@@ -20,6 +20,8 @@ export default function JobBoard() {
   const [jobStatus, setJobStatus] = useState();
   const [jobStartTime, setJobStartTime] = useState();
   const [jobModalIsOpen, setJobModalIsOpen] = useState();
+  const [createdJobs, setCreatedJobs] = useState([]);
+  const [assignedJobs, setAssignedJobs] = useState([]);
 
     useEffect( () => {
       async function handleLoadCreatedJobs() {
@@ -47,12 +49,12 @@ export default function JobBoard() {
                 },
               };
             
-              const query = await client.queryContractSmart(
+              const {jobs} = await client.queryContractSmart(
                 contractAddress,
                 msg
               );
-            
-              console.log("created jobs: ", query);
+              setCreatedJobs(jobs)
+              console.log("created jobs: ", createdJobs);
             
               } catch (error) {
                 console.log('error', error)
@@ -94,12 +96,12 @@ export default function JobBoard() {
                 },
               };
             
-              const query = await client.queryContractSmart(
+              const {jobs} = await client.queryContractSmart(
                 contractAddress,
                 msg
               );
-            
-              console.log("assigned jobs: ", query);
+              setAssignedJobs(jobs)
+              console.log("assigned jobs: ", assignedJobs);
             
               } catch (error) {
                 console.log('error', error)
@@ -146,7 +148,7 @@ export default function JobBoard() {
           }
           try {
             let request_contractor_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, request_contractor_entry_point, 'auto', "Requesting contractor on Arch-Hub", funds);
-            console.log("Update Profile metadata with txn hash", request_contractor_tx);
+            console.log("Requested contractor with txn hash", request_contractor_tx);
           
             toast.success("Hurray! contractor requested successfully!!", {
               position: toast.TOP_LEFT,
@@ -192,7 +194,7 @@ export default function JobBoard() {
           // update profile txn
           const contractAddress = CONTRACT_TESTNET_ADDRESS;
             const client = await ArchwayClient.connect(ChainInfo.rpc);
-            
+
             try {
               let id = parseInt(viewJobId)
               const msg = {
@@ -235,52 +237,70 @@ export default function JobBoard() {
         <>
           <ToastContainer />
           <div className="md:w-12/12">
-            <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-6'>
+            {/* created jobs */}
+            <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-24'>
               <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
                 <div className='block pt-0 px-2 w-72 md:w-[36rem]'>
                   <div className='inline-flex flex-col justify-start items-start'>
                     <div className='flex justify-start'>
-                      <h className='text-orange-600 text-md font-semibold leading-tight mb-2 mr-24 md:mr-96'>
+                      <h className='text-orange-600 text-md font-bold leading-tight mb-2 mr-24 md:mr-96'>
                         {" "}
-                        Created Jobs
+                        CREATED JOBS
                       </h>
                     </div>
-                    <div className='inline-flex flex-row'>
-                      <p className='text-gray-900 text-base mb-2'>job id...</p>
+                    <div className='' >
+                      <table className='divide-gray-200 text-orange-600'> 
+                        <thead>
+                          <tr>
+                            <th className='px-36 py-4'>job ids</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {createdJobs.map(job => 
+                            <tr key={job}>
+                              <td className='px-40 py-4'>{job}</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
                     </div>
-                  </div>
-      
-                  <div className='inline-flex flex-col'>
-                    <p className='text-gray-900 text-base mb-2'></p>
-                    <p className='text-blue-600 text-base mb-2'>$price</p>
                   </div>
                 </div>
               </div>
             </div>{" "}
 
             {/* assigned jobs */}
-            <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-6'>
+            <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-24'>
               <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
                 <div className='block pt-0 px-2 w-72 md:w-[36rem]'>
                   <div className='inline-flex flex-col justify-start items-start'>
                     <div className='flex justify-start'>
-                      <h className='text-orange-600 text-md font-semibold leading-tight mb-2 mr-24 md:mr-96'>
+                      <h className='text-orange-600 text-md font-bold leading-tight mb-2 mr-24 md:mr-96'>
                         {" "}
-                        Assigned Jobs
+                        ASSIGNED JOBS
                       </h>
                     </div>
-                    <div className='inline-flex flex-row'>
-                      <p className='text-gray-900 text-base mb-2'>job id</p>
+                    <div className='' >
+                      <table className='divide-gray-200 text-orange-600'> 
+                        <thead>
+                          <tr>
+                            <th className='px-36 py-4'>job ids</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {assignedJobs.map(job => 
+                            <tr key={job}>
+                              <td className='px-40 py-4'>{job}</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
                     </div>
-                  </div>
-      
-                  <div className='inline-flex flex-col'>
-                    <p className='text-gray-900 text-base mb-2'></p>
-                    <p className='text-blue-600 text-base mb-2'>$price</p>
                   </div>
                 </div>
               </div>
             </div>{" "}
+
           <div className='flex flex-row justify-center items-center content-center pt-12 mx-8 bg-opacity-100'>
             <p className="bg-orange-600 rounded-md text-white font-semibold mx-48 py-3 px-24 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
               onClick={e => setCreateJobModalIsOpen(true)}>

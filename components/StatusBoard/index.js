@@ -78,6 +78,12 @@ export default function StatusBoard() {
           try {
             let set_availability_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, set_availability_entry_point, 'auto', "Updating Arch-Hub availability");
             console.log("Update Profile availability with txn hash", set_availability_tx);
+            toast.success("Hurray! availability changed successfully!!", {
+              position: toast.TOP_LEFT,
+              autoClose: 6000, // Close the toast after 3 seconds
+            })
+
+            window.location.reload();
           } catch (error) {
             console.error(error)
           } 
