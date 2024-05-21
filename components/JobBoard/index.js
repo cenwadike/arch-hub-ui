@@ -22,6 +22,9 @@ export default function JobBoard() {
   const [jobModalIsOpen, setJobModalIsOpen] = useState();
   const [createdJobs, setCreatedJobs] = useState([]);
   const [assignedJobs, setAssignedJobs] = useState([]);
+  const [displayedJobStatus, setDisplayedJobStatus] = useState()
+  const [acceptJobId, setAcceptJobId] = useState();
+  const [acceptJobModalIsOpen, setAcceptJobModalIsOpen] = useState(false)
 
     useEffect( () => {
       async function handleLoadCreatedJobs() {
@@ -174,6 +177,62 @@ export default function JobBoard() {
       setCreateJobModalIsOpen(false);
     }
 
+    const handleAcceptJob = async() => {
+      if (window['keplr']) {
+        if (window.keplr['experimentalSuggestChain']) {
+          await window.keplr.enable(ChainInfo.chainId);
+          window.keplr.defaultOptions = {
+            sign: {
+              preferNoSetFee: true,    
+            }   
+          }
+    
+          const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
+          CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
+          accounts = await offlineSigner.getAccounts();	
+    
+          // update profile txn
+          const ContractAddress = CONTRACT_TESTNET_ADDRESS;
+          let cost = '1000000000000000000'
+          let funds = [{
+            denom: 'aconst',
+            amount: cost,
+          }]
+    
+          let jobId = parseInt(acceptJobId)
+          const accept_job_entry_point = {
+            accept_request: {
+              job_id: jobId,
+          }
+          }
+          try {
+            let accept_job_entry_point_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, accept_job_entry_point, 'auto', "Accepting Gig on Arch-Hub", funds);
+            console.log("Accepted job with txn hash", accept_job_entry_point_tx);
+          
+            toast.success("Hurray! job accepted successfully!!", {
+              position: toast.TOP_LEFT,
+              autoClose: 6000, // Close the toast after 3 seconds
+            })
+          } catch (error) {
+            toast.error('Oops! Could accept job. Try again', {
+              position: toast.TOP_LEFT,
+              autoClose: 6000, // Close the toast after 3 seconds
+            });
+            console.log(error)
+          }
+    
+          setAcceptJobModalIsOpen(false)
+        } else {
+          console.warn('Error accessing experimental features, please update Keplr');
+    
+        }
+      } else {
+        console.warn('Error accessing Keplr, please install Keplr');
+      }
+    
+      setCreateJobModalIsOpen(false);
+    }
+
     const handleViewJob = async() => {
       setViewJobModalIsOpen(false)
       setJobModalIsOpen(true)
@@ -271,7 +330,7 @@ export default function JobBoard() {
 
             {/* assigned jobs */}
             <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-24'>
-              <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
+              <div className='block p-2 mx-8 bg-inherit bg-opacity-100'>
                 <div className='block pt-0 px-2 w-72 md:w-[36rem]'>
                   <div className='inline-flex flex-col justify-start items-start'>
                     <div className='flex justify-start'>
@@ -285,12 +344,20 @@ export default function JobBoard() {
                         <thead>
                           <tr>
                             <th className='px-36 py-4'>job ids</th>
+                            <th className='px-36 py-4'>status</th>
                           </tr>
                         </thead>
                         <tbody>
                           {assignedJobs.map(job => 
                             <tr key={job}>
                               <td className='px-40 py-4'>{job}</td>
+                              <td className='py-4 p-0'>
+                                <p className="bg-orange-600 rounded-md text-white font-semibold mx-8 py-2 px-24 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
+                                  onClick={e => setAcceptJobModalIsOpen(true)}
+                                  >
+                                    accept
+                                </p>
+                              </td>
                             </tr>
                           )}
                         </tbody>
@@ -403,33 +470,41 @@ export default function JobBoard() {
                           className="border border-md border-orange-600 p-2 ml-24 rounded-md" type="text" 
                           readOnly
                         />
-                      </label> 
-                      <label className="text-orange-600 font-semibold pt-6 text-md">
-                        duration: {" "}
-                        <input 
-                          placeholder={jobDuration}
-                          className="border border-md border-orange-600 p-2 ml-16 rounded-md" type="text" 
-                          readOnly
-                        />
-                      </label> 
-                      <label className="text-orange-600 font-semibold pt-6 text-md">
-                        start at: {" "}
-                        <input 
-                          placeholder={jobStartTime}
-                          className="border border-md border-orange-600 p-2 ml-16 rounded-md" type="text" 
-                          readOnly
-                        />
-                      </label> 
+                      </label>
                       <label className="text-orange-600 font-semibold pt-6 text-md">
                         status: {" "}
                         <input 
                           placeholder={jobStatus}
-                          className="border border-md border-orange-600 p-2 ml-16 rounded-md" type="text" 
+                          className="border border-md border-orange-600 p-2 ml-20 rounded-md" type="text" 
                           readOnly
                         />
                       </label> 
                     <br/>
                     <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl hover:bg-orange-900 transition-all duration-300 ease-linear" onClick={e => setJobModalIsOpen(false)}>close</button> 
+                  </div>                
+              </div>
+            </dialog>
+          }
+
+          {
+            acceptJobModalIsOpen &&
+            <dialog
+            className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
+              <div className="bg-white m-auto py-6 px-16 flex justify-center items-center border rounded-lg">
+                  <div className="flex flex-col items-center">
+                  <label className="text-orange-600 font-semibold text-md">
+                        job id: {" "}
+                        <input 
+                          value={acceptJobId}
+                          onChange={e => setAcceptJobId(e.currentTarget.value)}
+                          placeholder="1"
+                          className="border border-md border-orange-600 ml-3 p-2 border rounded-md" 
+                          type="text"
+                          name="name" 
+                        />
+                      </label> 
+                    <br/>
+                    <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl hover:bg-orange-900 transition-all duration-300 ease-linear" onClick={handleAcceptJob}>confirm</button> 
                   </div>                
               </div>
             </dialog>
