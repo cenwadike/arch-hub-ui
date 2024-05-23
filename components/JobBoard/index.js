@@ -214,7 +214,7 @@ export default function JobBoard() {
               autoClose: 6000, // Close the toast after 3 seconds
             })
           } catch (error) {
-            toast.error('Oops! Could accept job. Try again', {
+            toast.error('Oops! Could not accept job. Try again', {
               position: toast.TOP_LEFT,
               autoClose: 6000, // Close the toast after 3 seconds
             });
@@ -353,7 +353,7 @@ export default function JobBoard() {
                                 <p className="bg-orange-600 rounded-md text-white font-semibold mx-8 py-2 px-24 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
                                   onClick={e => setAcceptJobModalIsOpen(true)}
                                   >
-                                    accept
+                                    accept job
                                 </p>
                               </td>
                             </tr>

@@ -5,6 +5,7 @@ import { useEffect, useState} from "react";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import { create } from "ipfs-http-client";
+import {concat} from 'uint8arrays'
 
 let accounts, CosmWasmClient;
 export default function ReviewBoard() {
@@ -13,6 +14,13 @@ export default function ReviewBoard() {
   const [reviewContent, setReviewContent] = useState();
   const [createJobReviewModalIsOpen, setCreateJobReviewModalIsOpen] = useState();
   const [viewJobReviewModalIsOpen, setViewJobReviewModalIsOpen] = useState();
+  const [offchainReviewContent, setOffchainReviewContent] = useState();
+  const [reviewModalIsOpen, setReviewModalIsOpen] = useState(false);
+  const [contractorDomainName, setContractorDomainName] = useState();
+  const [clientDomainName, setClientDomainName] = useState();
+  const [jobRate, setJobRate] = useState();
+  const [jobDuration, setJobDuration] = useState()
+  const [jobStatus, setJobStatus] = useState()
 
   const handleViewJobReview = async() => {
     if (window['keplr']) {
@@ -44,13 +52,38 @@ export default function ReviewBoard() {
         }
         try {
           const client = await ArchwayClient.connect(ChainInfo.rpc);
-          const view_review_tx = await client.queryContractSmart(ContractAddress, view_review_entry_point);
-          console.log("Review viewed successfully", view_review_tx);
-        
-          toast.success("Hurray! review loaded successfully!!", {
-            position: toast.TOP_LEFT,
-            autoClose: 6000, // Close the toast after 3 seconds
-          })
+          const {review, contrator_domain, customer_domain, rate, lenth, status} = await client.queryContractSmart(ContractAddress, view_review_entry_point);
+          setClientDomainName(customer_domain);
+          setContractorDomainName(contrator_domain);
+          setJobRate(rate);
+          setJobDuration(lenth);
+          setJobStatus(status);
+          console.log("Review viewed successfully", review);
+
+          const AuthHeader = 'Basic ' + Buffer.from(INFURA_API_KEY + ":" + INFURA_API_SECRET).toString('base64');
+
+          const ipfsClient = await create({
+            host: 'ipfs.infura.io',
+            port: 5001,
+            protocol: 'https',
+            headers: {
+              'Authorization': AuthHeader
+            }
+          });
+
+          try {
+            let chunks = [];
+            for await (const chunk of ipfsClient.cat(review)) {
+              chunks.push(chunk);
+            }
+            
+            const data = concat(chunks)
+            const decodedData = JSON.parse(new TextDecoder().decode(data).toString());
+            console.log("Offchain review: ", decodedData.content ); 
+            setOffchainReviewContent(decodedData.content)
+          } catch (error) {
+            console.error(error)
+          }
         } catch (error) {
           toast.error('Oops! No review found', {
             position: toast.TOP_LEFT,
@@ -60,6 +93,7 @@ export default function ReviewBoard() {
         }
 
       setViewJobReviewModalIsOpen(false);
+      setReviewModalIsOpen(true)
       } else {
         console.warn('Error accessing experimental features, please update Keplr');
   
@@ -147,6 +181,7 @@ export default function ReviewBoard() {
       console.warn('Error accessing Keplr, please install Keplr');
     }
   }
+
     return (
         <>
         <ToastContainer />
@@ -216,7 +251,66 @@ export default function ReviewBoard() {
             </div>
           </dialog>
         }
-
+        {
+          reviewModalIsOpen &&
+          <dialog
+          className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
+            <div className="bg-white m-auto py-6 px-16 flex justify-center items-center border rounded-lg">
+                <div className="flex flex-col items-center">
+                    <label className="text-orange-600 font-semibold pt-6 pl-12 text-md">
+                      review:
+                      <textarea 
+                        placeholder={offchainReviewContent}
+                        className="border border-md border-orange-600 ml-16 p-2 rounded-md" type="text" 
+                        readOnly
+                      />
+                    </label>
+                    <label className="text-orange-600 font-semibold pt-6 pl-9 text-md">
+                      contractor:
+                      <input 
+                        placeholder={contractorDomainName}
+                        className="border border-md border-orange-600 p-2 ml-12 rounded-md" type="text"
+                        readOnly 
+                      />
+                    </label>
+                    <label className="text-orange-600 font-semibold pt-6 pl-20 text-md">
+                      client:
+                      <input 
+                        placeholder={clientDomainName}
+                        className="border border-md border-orange-600 p-2 ml-12 rounded-md" type="text"
+                        readOnly 
+                      />
+                    </label>
+                    <label className="text-orange-600 font-semibold pt-6 pl-2 text-md">
+                      rate ($CONST):
+                      <input 
+                        placeholder={jobRate}
+                        className="border border-md border-orange-600 p-2 ml-12 rounded-md" type="text"
+                        readOnly 
+                      />
+                    </label> 
+                    <label className="text-orange-600 font-semibold pt-6 pl-4 text-md">
+                      duration (hrs):
+                      <input 
+                        placeholder={jobDuration}
+                        className="border border-md border-orange-600 p-2 ml-12 rounded-md" type="text"
+                        readOnly 
+                      />
+                    </label> 
+                    <label className="text-orange-600 font-semibold pt-6 pl-16 text-md">
+                      status:
+                      <input 
+                        placeholder={jobStatus}
+                        className="border border-md border-orange-600 p-2 ml-12 rounded-md" type="text"
+                        readOnly 
+                      />
+                    </label> 
+                  <br/>
+                  <button type="button" className="bg-orange-600 text-white font-semibold p-2 mt-6 rounded-md border-xl hover:bg-orange-900 transition-all duration-300 ease-linear" onClick={e => setReviewModalIsOpen(false)}>close</button> 
+                </div>                
+            </div>
+          </dialog>
+        }
           </div>
         </>
     );

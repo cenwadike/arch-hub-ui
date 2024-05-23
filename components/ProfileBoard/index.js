@@ -525,13 +525,13 @@ const findProfile = async() => {
             </div>{" "}
 
             <div className='flex flex-row justify-center items-center md:ml-44 mt-12 ml-24'>
-              <div className='block p-2 mx-8 rounded-lg border border-orange-600 bg-inherit bg-opacity-100'>
+              <div className='block p-2 mx-8 rounded-lg bg-inherit bg-opacity-100'>
                 <div className='block pt-0 px-2 w-72 md:w-[36rem]'>
                   <div className='inline-flex flex-col justify-start items-start'>
                     <div className='flex justify-start'>
                       <h className='text-orange-600 text-md font-bold leading-tight mb-2 mr-24 md:mr-96'>
                         {" "}
-                        PROFILES
+                        ACCOUNTS
                       </h>
                     </div>
                     <div className='' >
@@ -539,7 +539,7 @@ const findProfile = async() => {
                         <thead>
                           <tr>
                             <th className='px-16 py-4'>names</th>
-                            <th className='px-16 py-4'>rates ($CONST)</th>
+                            <th className='px-16 py-4'>rates ($CONST/hr)</th>
                           </tr>
                         </thead>
                         <tbody>

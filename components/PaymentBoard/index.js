@@ -32,9 +32,10 @@ export default function PaymentBoard() {
           const ContractAddress = CONTRACT_TESTNET_ADDRESS;      
   
           // request payment 
+          let jobId = parseInt(requestPaymentJobId);
           const request_payment_entry_point = {
             withdrawal_request: {
-                job_id: requestPaymentJobId,
+                job_id: jobId,
             }
         };
           try {
@@ -45,6 +46,10 @@ export default function PaymentBoard() {
                 autoClose: 6000, // Close the toast after 3 seconds
               })
           } catch (error) {
+            toast.error("Oops! could not request payment. Job not completed", {
+              position: toast.TOP_LEFT,
+              autoClose: 6000, // Close the toast after 3 seconds
+            })
             console.error(error)
           } 
 
@@ -74,9 +79,10 @@ export default function PaymentBoard() {
             const ContractAddress = CONTRACT_TESTNET_ADDRESS;      
     
             // approve payment 
+            let jobId = parseInt(approvePaymentJobId);
             const approve_withdrawal_entry_point = {
                 approve_withdrawal: {
-                    job_id: approvePaymentJobId,
+                    job_id: jobId,
                 }
             };
             try {
@@ -87,6 +93,10 @@ export default function PaymentBoard() {
                 autoClose: 6000, // Close the toast after 3 seconds
               })
             } catch (error) {
+              toast.error("Oops! Could not approve payment. Job not completed", {
+                position: toast.TOP_LEFT,
+                autoClose: 6000, // Close the toast after 3 seconds
+              })
               console.error(error)
             } 
             setApprovePaymentModalIsOpen(false)
@@ -137,7 +147,7 @@ export default function PaymentBoard() {
                 autoClose: 6000, // Close the toast after 3 seconds
               })
             } catch (error) {
-              toast.error('Oops! Could not reject payment. Try again', {
+              toast.error('Oops! Could not reject payment. Try again after payment is requested', {
                 position: toast.TOP_LEFT,
                 autoClose: 6000, // Close the toast after 3 seconds
               });
@@ -183,7 +193,7 @@ export default function PaymentBoard() {
               }
             }
             try {
-              let withdraw_payment_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, accept_job_entry_point, 'auto', "Withdrawing payment on Arch-Hub", funds);
+              let withdraw_payment_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, withdraw_payment_entry_point, 'auto', "Withdrawing payment on Arch-Hub", funds);
               console.log("withdrawing payment with txn hash", withdraw_payment_tx);
             
               toast.success("Payment withdrawn successfully!!", {
@@ -191,7 +201,7 @@ export default function PaymentBoard() {
                 autoClose: 6000, // Close the toast after 3 seconds
               })
             } catch (error) {
-              toast.error('Oops! Could not withdraw payment. Try again', {
+              toast.error('Oops! Could not withdraw payment. Try again after withdrawal is approved', {
                 position: toast.TOP_LEFT,
                 autoClose: 6000, // Close the toast after 3 seconds
               });
