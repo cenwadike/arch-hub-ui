@@ -30,11 +30,12 @@ export default function ProfileBaord() {
   const [findProfileDomainName, setFindProfileDomainName] = useState();
   const [findProfileAvailability, setFindProfileAvailability] = useState();
   const [findProfileRate, setFindProfileRate] = useState();
+  const [findProfileSkills, setFindProfileSkills] = useState();
   const [profiless, setProfiles] = useState([]);
 
   // get profile
   useEffect(() => {
-    async function getProfile() {
+    async function loadProfile() {
       if (window['keplr']) {
         if (window.keplr['experimentalSuggestChain']) {
           await window.keplr.enable(ChainInfo.chainId);
@@ -67,59 +68,18 @@ export default function ProfileBaord() {
           };
         
           try {
-            let {available, hour_rate, arch_id, meta_data } = await client.queryContractSmart(ContractAddress, entrypoint);
+            let {arch_id,available, hour_rate, skill, preference} = await client.queryContractSmart(ContractAddress, entrypoint);
             setDomainName(arch_id);
             setAvailabilty(available);
             setHourRate(hour_rate);
-            console.log("metadata ",meta_data)
+            setOffChainSkills(skill);
+            setOffChainContract(preference.contract);
+            setOffChainRemote(preference.remote);
+            console.log("metadata ",preference)
           } catch (error) {
             console.log(error)
           }
-          
-
-          // get metadata from IPFS
-          try {
-            let res = await client.queryContractSmart(ContractAddress, entrypoint);
-            let ipfsHash = res.meta_data.description;
-            setIpfsHash(ipfsHash);
-            console.log("IPFS Hash: ", ipfsHash);
-          } catch (error) {
-            console.log(error)
-          }
-
-          const AuthHeader = 'Basic ' + Buffer.from(INFURA_API_KEY + ":" + INFURA_API_SECRET).toString('base64');
-
-          try {
-            const ipfsClient = await create({
-              host: 'ipfs.infura.io',
-              port: 5001,
-              protocol: 'https',
-              headers: {
-                'Authorization': AuthHeader
-              }
-            });
-  
-            try {
-              let chunks = [];
-              for await (const chunk of ipfsClient.cat(ipfsHash)) {
-                chunks.push(chunk);
-              }
-              
-              const data = concat(chunks)
-              const decodedData = JSON.parse('' + new TextDecoder().decode(data).toString());
-
-              setOffChainSkills(decodedData.skills)
-              setOffChainRemote(decodedData.preferences.remote)
-              setOffChainContract(decodedData.preferences.contract)
-              console.log("Offchain metadata: ", decodedData.skills); 
-              
-            } catch (error) {
-              console.error(error)
-            }
-          } catch (error) {
-            console.error(error)
-          }
-          
+            
         } else {
           console.warn('Error accessing experimental features, please update Keplr');
         }
@@ -127,7 +87,7 @@ export default function ProfileBaord() {
         console.warn('Error accessing Keplr, please install Keplr');
       }
     }
-    getProfile();
+    loadProfile();
   }, [])
 
   
@@ -157,40 +117,14 @@ const handleUpdateProfile = async() => {
       };
       let res = await client.queryContractSmart(contractAddress, entrypoint);
       
-      // add metadat to ipfs
-      const AuthHeader = 'Basic ' + Buffer.from(INFURA_API_KEY + ":" + INFURA_API_SECRET).toString('base64');
-
-      const ipfsClient = await create({
-        host: 'ipfs.infura.io',
-        port: 5001,
-        protocol: 'https',
-        headers: {
-          'Authorization': AuthHeader
-        }
-      });
-      console.log("Created Ipfs client: ", ipfsClient);
-
-      const profileMetadata = {
-        "address": accounts[0].address,
-        "portfolio": portfolio,
-        "skills": skills,
-        "availability": res.available,
-        "hourly_rate": res.hour_rate,
-        "preferences": {
-          "contract": contract,
-          "fulltime": fullTime,
-          "remote": remote,
-          "enterprise": enterprise,
-          "startup": startup
-        }
+      
+      const preference = {
+        contract: contract,
+        fulltime: fullTime,
+        remote: remote,
+        enterprise: enterprise,
+        startup: startup,
       }
-
-      const profileMetadataJson = JSON.stringify(profileMetadata);
-      let {cid, path} = await ipfsClient.add(profileMetadataJson);
-      setIpfsHash(path);
-
-      console.log("Ipfs upload successful: ", path);
-
 
       // update profile txn
       const ContractAddress = CONTRACT_TESTNET_ADDRESS;
@@ -203,13 +137,9 @@ const handleUpdateProfile = async() => {
       const update_metadata_entry_point = {
         update_metadata: {
           name: domainName,
-          update: {
-            description: path,
-            image: "'_'",
-            accounts: [{username: "archid-protocol",profile: "https://github.com/archid-protocol",account_type: "github",verfication_hash: null}],
-            websites: [{url: "https://archid.app",domain: "dapp.archid.arch",verfication_hash: null}]
-          },  
-        }
+          skill: skills,
+          preference: preference
+      }
       }
       try {
         let update_metadata_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, update_metadata_entry_point, 'auto', "Updating Arch-Hub profile metadata", funds);
@@ -313,10 +243,11 @@ const findProfile = async() => {
       };
     
       try {
-        let {arch_id, available, hour_rate} = await client.queryContractSmart(ContractAddress, entrypoint);
+        let {arch_id, available, hour_rate, skill} = await client.queryContractSmart(ContractAddress, entrypoint);
         setFindProfileDomainName(arch_id);
         setFindProfileAvailability(available);
         setFindProfileRate(hour_rate);
+        setFindProfileSkills(skill);
         console.log("single profile ", findProfileDomainName);
       } catch (error) {
         console.log(error)
@@ -515,10 +446,18 @@ const findProfile = async() => {
                             />
                           </label>
                           <label className="text-orange-600 font-semibold pt-6 text-md">
-                            rate: {"$CONST"}
+                            rate($CONST):
                             <input 
                               placeholder={findProfileRate}
-                              className="border border-md border-orange-600 p-2 ml-12 rounded-md" type="text"
+                              className="border border-md border-orange-600 p-2 ml-8 rounded-md" type="text"
+                              readOnly 
+                            />
+                          </label> 
+                          <label className="text-orange-600 font-semibold pt-6 text-md">
+                            skills:
+                            <input 
+                              placeholder={findProfileSkills}
+                              className="border border-md border-orange-600 p-2 ml-24 rounded-md" type="text"
                               readOnly 
                             />
                           </label> 

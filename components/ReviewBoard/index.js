@@ -118,30 +118,7 @@ export default function ReviewBoard() {
   
         const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
         CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
-        accounts = await offlineSigner.getAccounts();	
-
-        // add review to IPFS
-        const AuthHeader = 'Basic ' + Buffer.from(INFURA_API_KEY + ":" + INFURA_API_SECRET).toString('base64');
-
-          const ipfsClient = await create({
-            host: 'ipfs.infura.io',
-            port: 5001,
-            protocol: 'https',
-            headers: {
-              'Authorization': AuthHeader
-            }
-          });
-
-          
-          const jobReview = {
-            "job id": jobId,
-            "content": reviewContent,            
-          }
-
-        const profileMetadataJson = JSON.stringify(jobReview);
-        let {cid, path} = await ipfsClient.add(profileMetadataJson);
-        setReviewIpfsHash(path)
-        console.log("REVIEW ADDED TO IPFS with: ", path)
+        accounts = await offlineSigner.getAccounts();
   
         // add review txn
         const ContractAddress = CONTRACT_TESTNET_ADDRESS;
@@ -155,11 +132,11 @@ export default function ReviewBoard() {
         const add_review_entry_point = {
           review: {
             job_id: job_id,
-            review: path
+            review: reviewContent
           }
         }
         try {
-          let add_review_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, add_review_entry_point, 'auto', "Adding job review on Arch-Hub", funds);
+          let add_review_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, add_review_entry_point, 'auto', "Adding job review on Arch-Hub");
           console.log("Review added successfully", add_review_tx);
         
           toast.success("Hurray! review added successfully!!", {

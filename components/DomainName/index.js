@@ -12,7 +12,14 @@ export default function DomainName() {
     const [createProfileModalIsOpen, setCreateProfileModalIsOpen] = useState();
     const [createNewProfileName, setCreateNewProfileName] = useState();
     const [createNewProfileRate, setCreateNewProfileRate] = useState();
-
+    const [portfolio, setPortforlio] = useState();
+    const [skills, setSkills] = useState();
+    const [remote, setRemote] = useState(false);
+    const [contract, setContract] = useState(false);
+    const [fullTime, setFullTime] = useState(false);
+    const [startup, setStartup] = useState(false);
+    const [enterprise, setEnterprise] = useState(false);
+    
     // load domain name
     useEffect(() => {
         async function getProfile() {
@@ -86,15 +93,25 @@ export default function DomainName() {
         amount: cost,
       }]
 
+      const preference = {
+        contract: contract,
+        fulltime: fullTime,
+        remote: remote,
+        enterprise: enterprise,
+        startup: startup,
+      }
+
       const create_profile_entry_point = {
         create_profile: {
           name: createNewProfileName,
           hour_rate: createNewProfileRate,
-          cost: cost
+          cost: cost,
+          skill: skills,
+          preference: preference,
         }
       }
       try {
-        let create_profile_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, create_profile_entry_point, 'auto', "Registering domain", funds);
+        let create_profile_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, create_profile_entry_point, 'auto', "Registering domain on Arch-Hub", funds);
         console.log("Create Profile with txn hash", create_profile_tx);
         toast.success("Hurray! Profile created successfully!!", {
           position: toast.TOP_LEFT,
@@ -148,22 +165,76 @@ export default function DomainName() {
                     className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-50 overflow-auto backdrop-blur flex justify-center items-center">
                     <div className="bg-white m-auto py-6 px-16 flex justify-center items-center border rounded-lg">
                         <div className="flex flex-col items-center">
-                          <label className="text-orange-600 font-semibold">
-                            Name: {" "}
+                        <label className="text-orange-600 font-semibold text-md pt-6 ">
+                            name: {" "}
                             <input 
                               value={createNewProfileName}
                               onChange={e => setCreateNewProfileName(e.currentTarget.value)}
-                              className="border border-md border-orange-600" type="text" name="name" 
+                              placeholder="portfolio-site.com"
+                              className="border border-md border-orange-600 ml-10 p-2 border rounded-md" type="text" name="name" 
                             />
-                          </label> 
-                          <label className="text-orange-600 font-semibold pt-8">
-                            Rate: {" "}
+                          </label>  
+                          <label className="text-orange-600 font-semibold text-md pt-6 ">
+                            rate: {" "}
                             <input 
                               value={createNewProfileRate}
                               onChange={e => setCreateNewProfileRate(e.currentTarget.value)}
-                              className="border border-md border-orange-600" type="text" name="name" 
+                              placeholder="portfolio-site.com"
+                              className="border border-md border-orange-600 p-2 ml-12 border rounded-md" type="text" name="name" 
                             />
                           </label> 
+                          <label className="text-orange-600 font-semibold text-md pt-6" >
+                            portfolio: {" "}
+                            <input 
+                              value={portfolio}
+                              onChange={e => setPortforlio(e.currentTarget.value)}
+                              placeholder="portfolio-site.com"
+                              className="border border-md border-orange-600 ml-3 p-2 border rounded-md" type="text" name="name" 
+                            />
+                          </label> 
+                          <label className="text-orange-600 font-semibold pt-6 text-md">
+                            skills: {" "}
+                            <input 
+                              value={skills}
+                              onChange={e => setSkills(e.currentTarget.value)}
+                              placeholder="skill_1, skill_2"
+                              className="border border-md border-orange-600 ml-9 p-2 border rounded-md" type="text" name="name" 
+                            />
+                          </label>
+                          <div className="inline-flex items-center justify-center pt-6">
+                          <label for="radremote" className="text-orange-600 font-semibold text-md">Remote</label>
+                          <input type="radio" name="remote"  id="radremote"
+                          className="border border-md border-orange-600 ml-16 border rounded-md"
+                          onClick={e => setRemote(!remote)}/>
+                          </div>
+
+                          <div className="inline-flex items-center justify-center">
+                            <label for="radcontract" className="text-orange-600 font-semibold text-md">Contract</label>
+                            <input type="radio" name="contract"  id="radcontract"
+                            className="border border-md border-orange-600 ml-14 border rounded-md"
+                            onClick={e => setContract(!contract)}/>
+                          </div> 
+
+                          <div className="inline-flex items-center justify-center">
+                            <label for="radfulltime" className="text-orange-600 font-semibold text-md">Fulltime</label>
+                            <input type="radio" name="fulltime"  id="radfulltime"
+                            className="border border-md border-orange-600 ml-16 border rounded-md"
+                            onClick={e => setFullTime(!fullTime)}/>
+                          </div> 
+
+                          <div className="inline-flex items-center justify-center">
+                            <label for="radstartup" className="text-orange-600 font-semibold text-md">Startup</label>
+                            <input type="radio" name="startup"  id="radstartup"
+                            className="border border-md border-orange-600 ml-16 border rounded-md"
+                            onClick={e => setStartup(!startup)}/>
+                          </div>
+
+                          <div className="inline-flex items-center justify-center">
+                            <label for="radenterprise" className="text-orange-600 font-semibold text-md">Enterprise</label>
+                            <input type="radio" name="enterprise"  id="radenterprise"
+                            className="border border-md border-orange-600 ml-11 border rounded-md"
+                            onClick={e => setEnterprise(!enterprise)}/>
+                          </div>
                           <br/>
                           <button type="button" className="bg-orange-600 text-white p-2 rounded-md border-xl" onClick={createProfile}>Create Profile</button>
                         </div>
