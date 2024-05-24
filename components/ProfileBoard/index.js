@@ -89,27 +89,33 @@ export default function ProfileBaord() {
 
           const AuthHeader = 'Basic ' + Buffer.from(INFURA_API_KEY + ":" + INFURA_API_SECRET).toString('base64');
 
-          const ipfsClient = await create({
-            host: 'ipfs.infura.io',
-            port: 5001,
-            protocol: 'https',
-            headers: {
-              'Authorization': AuthHeader
-            }
-          });
-
           try {
-            let chunks = [];
-            for await (const chunk of ipfsClient.cat(ipfsHash)) {
-              chunks.push(chunk);
+            const ipfsClient = await create({
+              host: 'ipfs.infura.io',
+              port: 5001,
+              protocol: 'https',
+              headers: {
+                'Authorization': AuthHeader
+              }
+            });
+  
+            try {
+              let chunks = [];
+              for await (const chunk of ipfsClient.cat(ipfsHash)) {
+                chunks.push(chunk);
+              }
+              
+              const data = concat(chunks)
+              const decodedData = JSON.parse('' + new TextDecoder().decode(data).toString());
+
+              setOffChainSkills(decodedData.skills)
+              setOffChainRemote(decodedData.preferences.remote)
+              setOffChainContract(decodedData.preferences.contract)
+              console.log("Offchain metadata: ", decodedData.skills); 
+              
+            } catch (error) {
+              console.error(error)
             }
-            
-            const data = concat(chunks)
-            const decodedData = JSON.parse(new TextDecoder().decode(data).toString());
-            setOffChainSkills(decodedData.skills)
-            setOffChainRemote(decodedData.preferences.remote)
-            setOffChainContract(decodedData.preferences.contract)
-            console.log("Offchain metadata: ", decodedData.skills ); 
           } catch (error) {
             console.error(error)
           }
@@ -209,6 +215,7 @@ const handleUpdateProfile = async() => {
         let update_metadata_tx = await CosmWasmClient.execute(accounts[0].address, ContractAddress, update_metadata_entry_point, 'auto', "Updating Arch-Hub profile metadata", funds);
         console.log("Update Profile metadata with txn hash", update_metadata_tx);
       
+        window.location.reload();
         toast.success("Hurray! Profile updated successfully!!", {
           position: toast.TOP_LEFT,
           autoClose: 6000, // Close the toast after 3 seconds
@@ -278,7 +285,6 @@ useEffect(() => {
 loadProfiles();
 }, [])
 
-const arrayDataItems = profiless.map((profile) => {<li>{profile}</li>});
 
 const findProfile = async() => {
   setFindProfileModalIsOpen(false);

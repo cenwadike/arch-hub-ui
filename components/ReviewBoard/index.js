@@ -72,28 +72,30 @@ export default function ReviewBoard() {
           });
 
           try {
-            let chunks = [];
+            let chunks;
             for await (const chunk of ipfsClient.cat(review)) {
               chunks.push(chunk);
             }
             
             const data = concat(chunks)
-            const decodedData = JSON.parse(new TextDecoder().decode(data).toString());
+            const decodedData = JSON.parse("" + new TextDecoder().decode(data));
             console.log("Offchain review: ", decodedData.content ); 
             setOffchainReviewContent(decodedData.content)
           } catch (error) {
             console.error(error)
           }
+          setViewJobReviewModalIsOpen(false);
+          setReviewModalIsOpen(true)
         } catch (error) {
           toast.error('Oops! No review found', {
             position: toast.TOP_LEFT,
             autoClose: 6000, // Close the toast after 3 seconds
           });
+          setViewJobReviewModalIsOpen(false)
           console.log(error)
         }
 
-      setViewJobReviewModalIsOpen(false);
-      setReviewModalIsOpen(true)
+      
       } else {
         console.warn('Error accessing experimental features, please update Keplr');
   
