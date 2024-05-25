@@ -170,7 +170,7 @@ export default function DomainName() {
                             <input 
                               value={createNewProfileName}
                               onChange={e => setCreateNewProfileName(e.currentTarget.value)}
-                              placeholder="portfolio-site.com"
+                              placeholder="name.arch"
                               className="border border-md border-orange-600 ml-10 p-2 border rounded-md" type="text" name="name" 
                             />
                           </label>  
@@ -179,7 +179,7 @@ export default function DomainName() {
                             <input 
                               value={createNewProfileRate}
                               onChange={e => setCreateNewProfileRate(e.currentTarget.value)}
-                              placeholder="portfolio-site.com"
+                              placeholder="10"
                               className="border border-md border-orange-600 p-2 ml-12 border rounded-md" type="text" name="name" 
                             />
                           </label> 

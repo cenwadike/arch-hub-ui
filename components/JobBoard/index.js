@@ -232,9 +232,6 @@ export default function JobBoard() {
     }
 
     const handleViewJob = async() => {
-      setViewJobModalIsOpen(false)
-      setJobModalIsOpen(true)
-
       if (window['keplr']) {
         if (window.keplr['experimentalSuggestChain']) {
           await window.keplr.enable(ChainInfo.chainId);
@@ -275,7 +272,15 @@ export default function JobBoard() {
 
               console.log("single job: ", jobId, contractorId, customerId, jobDuration, jobRate, jobStartTime, jobStartTime);
 
+              setCreateJobModalIsOpen(false);
+              setViewJobModalIsOpen(true)
+          
             } catch (error) {
+              toast.error('Oops! Could not find job with this id.', {
+                position: toast.TOP_LEFT,
+                autoClose: 6000, // Close the toast after 3 seconds
+              });
+              setViewJobModalIsOpen(false)
               console.error(error)
             }
 
@@ -287,7 +292,7 @@ export default function JobBoard() {
         console.warn('Error accessing Keplr, please install Keplr');
       }
     
-      setCreateJobModalIsOpen(false);
+      
     }
 
     return (
