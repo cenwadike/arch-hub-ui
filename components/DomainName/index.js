@@ -175,7 +175,7 @@ export default function DomainName() {
                             />
                           </label>  
                           <label className="text-orange-600 font-semibold text-md pt-6 ">
-                            rate: {" "}
+                            rate ($CONST): {" "}
                             <input 
                               value={createNewProfileRate}
                               onChange={e => setCreateNewProfileRate(e.currentTarget.value)}
