@@ -101,11 +101,12 @@ export default function DomainName() {
         startup: startup,
       }
 
+      let costInt = parseInt(cost);
       const create_profile_entry_point = {
         create_profile: {
           name: createNewProfileName,
           hour_rate: createNewProfileRate,
-          cost: cost,
+          cost: costInt,
           skill: skills,
           preference: preference,
         }
