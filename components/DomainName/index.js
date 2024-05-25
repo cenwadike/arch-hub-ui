@@ -171,7 +171,7 @@ export default function DomainName() {
                             <input 
                               value={createNewProfileName}
                               onChange={e => setCreateNewProfileName(e.currentTarget.value)}
-                              placeholder="name.arch"
+                              placeholder="name"
                               className="border border-md border-orange-600 ml-10 p-2 border rounded-md" type="text" name="name" 
                             />
                           </label>  
