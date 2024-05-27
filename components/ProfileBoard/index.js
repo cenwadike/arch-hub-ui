@@ -327,16 +327,18 @@ const findProfile = async() => {
 
             <div className='flex flex-row justify-center items-center content-center pt-12 mx-8 bg-opacity-100'>
               <div className='flex flex-row justify-center items-center content-center pt-12 mx-8 bg-opacity-100'>
-                <p className="bg-orange-600 rounded-md text-white font-semibold mx-48 py-3 px-28 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
+                {
+                  domainName &&
+                  <p className="bg-orange-600 rounded-md text-white font-semibold mx-48 py-3 px-28 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
                   onClick={e => setUpdateProfileModalIsOpen(true)}>
                     update profile
-                </p>
+                  </p>
+                }
                 <p className="bg-orange-600 rounded-md text-center text-white font-semibold mx-12 py-3 px-24 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear"
                   onClick={e => setFindProfileModalIsOpen(true)}>
                     find profiles
                 </p>
               </div>
-
               {
                 updateProfileModalIsOpen && 
                 <dialog
