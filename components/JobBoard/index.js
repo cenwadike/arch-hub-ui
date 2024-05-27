@@ -307,7 +307,7 @@ export default function JobBoard() {
                     <div className='flex justify-start'>
                       <h className='text-orange-600 text-md font-bold leading-tight mb-2 mr-24 md:mr-96'>
                         {" "}
-                        CREATED JOBS
+                        ASSIGNED JOBS
                       </h>
                     </div>
                     <div className='' >
@@ -339,7 +339,7 @@ export default function JobBoard() {
                     <div className='flex justify-start'>
                       <h className='text-orange-600 text-md font-bold leading-tight mb-2 mr-24 md:mr-96'>
                         {" "}
-                        ASSIGNED JOBS
+                        CREATED JOBS
                       </h>
                     </div>
                     <div className='' >
