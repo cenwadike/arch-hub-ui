@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { SigningArchwayClient} from '@archwayhq/arch3.js';
 import ChainInfo from 'constantine.config';
-import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
 
 let accounts, CosmWasmClient, queryHandler;
 
@@ -31,10 +29,6 @@ export default function HomePage() {
 						chain: ChainInfo,
 						queryHandler: queryHandler,
 					});
-					toast.success("Welcome! Wallet connected successfully", {
-						position: toast.TOP_LEFT,
-						autoClose: 6000, // Close the toast after 3 seconds
-					})
 				} catch (error) {
 					console.error(error)
 				}
@@ -49,9 +43,7 @@ export default function HomePage() {
 	
 
   return (
-	<>
-	<ToastContainer />
-	
+	<>	
     <div className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
         <p className="fixed left-0 top-0 flex w-full justify-center from-zinc-200 pb-6 pt-8 dark:from-inherit lg:static lg:w-auto lg:rounded-xl lg:p-4 text-4xl font-bold text-orange-600">
