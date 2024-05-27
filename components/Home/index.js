@@ -18,23 +18,26 @@ export default function HomePage() {
 					}   
 				}
 
-				const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
-				CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
-				accounts = await offlineSigner.getAccounts();	// user accounts
-				queryHandler = CosmWasmClient.queryContractSmart;	// A less verbose reference to handle our queries	
+				try {
+					const offlineSigner = await window.getOfflineSignerAuto(ChainInfo.chainId);
+					CosmWasmClient = await SigningArchwayClient.connectWithSigner(ChainInfo.rpc, offlineSigner);
+					accounts = await offlineSigner.getAccounts();	// user accounts
+					queryHandler = CosmWasmClient.queryContractSmart;	// A less verbose reference to handle our queries	
 				
-				console.log('Wallet connected', {
-					offlineSigner: offlineSigner,
-					CosmWasmClient: CosmWasmClient,
-					accounts: accounts,
-					chain: ChainInfo,
-					queryHandler: queryHandler,
-				});
-
-				toast.success("Welcome! Wallet connected successfully", {
-					position: toast.TOP_LEFT,
-					autoClose: 6000, // Close the toast after 3 seconds
-				})
+					console.log('Wallet connected', {
+						offlineSigner: offlineSigner,
+						CosmWasmClient: CosmWasmClient,
+						accounts: accounts,
+						chain: ChainInfo,
+						queryHandler: queryHandler,
+					});
+					toast.success("Welcome! Wallet connected successfully", {
+						position: toast.TOP_LEFT,
+						autoClose: 6000, // Close the toast after 3 seconds
+					})
+				} catch (error) {
+					console.error(error)
+				}
 			} else {
 				console.warn('Error accessing experimental features, please update Keplr');
 
