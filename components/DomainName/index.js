@@ -101,10 +101,10 @@ export default function DomainName() {
         startup: startup,
       }
 
-      ;
+      let newProfileName = createNewProfileName.toLowerCase();
       const create_profile_entry_point = {
         create_profile: {
-          name: createNewProfileName,
+          name: newProfileName,
           hour_rate: createNewProfileRate,
           cost: cost,
           skill: skills,
@@ -140,14 +140,14 @@ export default function DomainName() {
         <div className="md:w-12/12">
           <ToastContainer />
             {
-              domainName ? 
-              <>
-                <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
-                    <p className="bg-orange-600 rounded-md text-white font-bold p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear">{domainName}</p>
-                </div>
-              </>
+            //   domainName ? 
+            //   <>
+            //     <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
+            //         <p className="bg-orange-600 rounded-md text-white font-bold p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear">{domainName}</p>
+            //     </div>
+            //   </>
             
-            :
+            // :
 
               <>
                 <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
@@ -172,7 +172,7 @@ export default function DomainName() {
                               value={createNewProfileName}
                               onChange={e => setCreateNewProfileName(e.currentTarget.value)}
                               placeholder="name"
-                              className="border border-md border-orange-600 ml-10 p-2 border rounded-md" type="text" name="name" 
+                              className="border border-md border-orange-600 ml-24 p-2 border rounded-md" type="text" name="name" 
                             />
                           </label>  
                           <label className="text-orange-600 font-semibold text-md pt-6 ">
@@ -181,7 +181,7 @@ export default function DomainName() {
                               value={createNewProfileRate}
                               onChange={e => setCreateNewProfileRate(e.currentTarget.value)}
                               placeholder="10"
-                              className="border border-md border-orange-600 p-2 ml-12 border rounded-md" type="text" name="name" 
+                              className="border border-md border-orange-600 p-2 ml-6 border rounded-md" type="text" name="name" 
                             />
                           </label> 
                           <label className="text-orange-600 font-semibold text-md pt-6" >
@@ -190,7 +190,7 @@ export default function DomainName() {
                               value={portfolio}
                               onChange={e => setPortforlio(e.currentTarget.value)}
                               placeholder="portfolio-site.com"
-                              className="border border-md border-orange-600 ml-3 p-2 border rounded-md" type="text" name="name" 
+                              className="border border-md border-orange-600 ml-16 p-2 border rounded-md" type="text" name="name" 
                             />
                           </label> 
                           <label className="text-orange-600 font-semibold pt-6 text-md">
@@ -199,7 +199,7 @@ export default function DomainName() {
                               value={skills}
                               onChange={e => setSkills(e.currentTarget.value)}
                               placeholder="skill_1, skill_2"
-                              className="border border-md border-orange-600 ml-9 p-2 border rounded-md" type="text" name="name" 
+                              className="border border-md border-orange-600 ml-24 p-2 border rounded-md" type="text" name="name" 
                             />
                           </label>
                           <div className="inline-flex items-center justify-center pt-6">
