@@ -140,14 +140,14 @@ export default function DomainName() {
         <div className="md:w-12/12">
           <ToastContainer />
             {
-            //   domainName ? 
-            //   <>
-            //     <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
-            //         <p className="bg-orange-600 rounded-md text-white font-bold p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear">{domainName}</p>
-            //     </div>
-            //   </>
+              domainName ? 
+              <>
+                <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
+                    <p className="bg-orange-600 rounded-md text-white font-bold p-2 hover:bg-white hover:border hover:border-orange-600 hover:text-orange-600 transition-all duration-300 ease-linear">{domainName}</p>
+                </div>
+              </>
             
-            // :
+            :
 
               <>
                 <div className="flex flex-row justify-end items-end md:pr-28 mt-10">
