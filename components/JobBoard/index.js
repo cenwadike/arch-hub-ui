@@ -271,9 +271,9 @@ export default function JobBoard() {
               setJobStartTime(start_time);
 
               console.log("single job: ", jobId, contractorId, customerId, jobDuration, jobRate, jobStartTime, jobStartTime);
-
-              setCreateJobModalIsOpen(false);
-              setViewJobModalIsOpen(true)
+;
+              setViewJobModalIsOpen(false)
+              setJobModalIsOpen(true)
           
             } catch (error) {
               toast.error('Oops! Could not find job with this id.', {
